@@ -83,10 +83,13 @@
             <div class="debt-summary">
                 <p>ยอดค้างชำระปัจจุบัน</p>
                 <h1 id="display-total-debt">฿0.00</h1>
-                
-                <!-- ปุ่มเวทมนตร์ สำหรับคีย์ซื้อของเอง -->
-                <button class="btn-self-record" onclick="selfRecordDebt()">
-                    🛒 ซื้อสินค้าด้วยตัวเอง (แปะโป้ง)
+            </div>
+
+            <!-- 🌟 สร้างกล่องใหม่แยกเฉพาะ สำหรับการซื้อของด้วยตัวเอง -->
+            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 4px solid #DD6B20;">
+                <p style="color: #4A5568; font-weight: 500; font-size: 0.95rem; margin-bottom: 12px;">แอดมินไม่อยู่ หรือ ต้องการหยิบสินค้าเอง?</p>
+                <button class="btn-self-record" style="margin-top: 0;" onclick="selfRecordDebt()">
+                    🛒 บันทึกยอดซื้อด้วยตัวเอง (แปะโป้ง)
                 </button>
             </div>
 
