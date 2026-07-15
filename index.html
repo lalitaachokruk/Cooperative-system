@@ -25,7 +25,6 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
         
-        /* ปลดล็อกให้หน้าจอเลื่อนสมูทแบบธรรมชาติของมือถือ ป้องกันอาการจอกระโดดดีดไปมา */
         body { 
             background-color: #EDF2F7; color: var(--text-dark); 
             display: flex; flex-direction: column; min-height: 100vh;
@@ -88,7 +87,7 @@
         /* 👤 ส่วนแสดงผลข้อมูล */
         #result-section { display: none; }
         
-        /* นามบัตร (สีน้ำเงิน) */
+        /* นามบัตร (สีน้ำเงิน) - ตั้ง Padding เป็น 20px */
         .profile-card { 
             background: linear-gradient(135deg, #1A365D, #2B6CB0); color: white; 
             padding: 20px; border-radius: 12px; margin-bottom: 20px; 
@@ -98,21 +97,21 @@
         .profile-info p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
         .btn-logout { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
-        /* 🔴 ยอดค้างชำระ (บีบขนาดให้เล็กลง สมส่วนพอดี ไม่ใหญ่กระแทกตา) */
+        /* 🔴 ยอดค้างชำระ (ตั้ง Padding ให้เท่ากล่องอื่น ขนาดสมส่วนพอดี) */
         .debt-summary { 
-            background: #FFF5F5; padding: 15px 20px; border-radius: 12px; text-align: center; 
-            border: 2px solid #FEB2B2; margin-bottom: 20px; 
+            background: #FFF5F5; padding: 20px; border-radius: 12px; text-align: center; 
+            border: 2px solid #FEB2B2; box-shadow: 0 4px 15px rgba(229, 62, 62, 0.1); margin-bottom: 20px; 
         }
-        .debt-summary p { font-size: 0.9rem; font-weight: 500; margin-bottom: 2px; color: #C53030; opacity: 0.9;}
-        .debt-summary h1 { font-size: 2rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
+        .debt-summary p { font-size: 1rem; font-weight: 500; margin-bottom: 5px; color: #C53030;}
+        .debt-summary h1 { font-size: 2.5rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
 
-        /* 🛒 กล่องบริการตัวเอง (เส้นทึบปกติสีส้ม พื้นขาว คลีนๆ) */
+        /* 🛒 กล่องบริการตัวเอง (ตั้ง Padding ให้เท่ากล่องอื่น) */
         .self-service-box {
-            background: white; padding: 18px 15px; border-radius: 12px; text-align: center; 
-            margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); 
+            background: white; padding: 20px; border-radius: 12px; text-align: center; 
+            margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
             border: 2px solid var(--warning-orange); 
         }
-        .self-service-box p { color: var(--text-dark); font-weight: 500; font-size: 0.95rem; margin-bottom: 12px; }
+        .self-service-box p { color: var(--text-dark); font-weight: 500; font-size: 1rem; margin-bottom: 12px; }
         .btn-self-record { 
             width: 100%; padding: 14px; background: var(--warning-orange); color: white; 
             border: none; border-radius: 8px; font-size: 1.05rem; cursor: pointer; 
@@ -122,7 +121,7 @@
 
         .section-title { font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; padding-left: 5px;}
         
-        /* 📜 การ์ดประวัติบิล (พื้นใส) */
+        /* 📜 การ์ดประวัติบิล */
         .bill-card { 
             background: transparent; padding: 15px; border-radius: 10px; 
             border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;
@@ -136,7 +135,7 @@
         
         .empty-state { text-align: center; padding: 30px 10px; color: #A0AEC0; font-size: 0.95rem; }
 
-        /* 📖 ปุ่มคู่มือ (สีน้ำเงิน) */
+        /* 📖 ปุ่มคู่มือ */
         #floating-manual-btn { 
             position: fixed; bottom: 25px; right: 25px; z-index: 999; 
             background-color: var(--primary-blue); color: white; border: none; border-radius: 50%; 
@@ -144,7 +143,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; 
         }
 
-        /* 🏢 Footer สีเทาอ่อน */
+        /* 🏢 Footer */
         .footer {
             text-align: center; font-size: 0.8rem; color: #A0AEC0;
             padding: 20px 10px; margin-top: auto; line-height: 1.5; opacity: 0.8;
@@ -153,7 +152,7 @@
 </head>
 <body>
 
-    <!-- ปุ่มคู่มือ สีน้ำเงินเข้าธีม -->
+    <!-- ปุ่มคู่มือ -->
     <button id="floating-manual-btn" onclick="showMobileManual()">📖</button>
 
     <div class="header">
@@ -198,13 +197,13 @@
                 <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
             </div>
 
-            <!-- กล่องยอดค้างชำระ (ลดขนาดให้สมส่วน เล็กลงกำลังดี) -->
+            <!-- กล่องยอดค้างชำระ (ขนาดเท่าเพื่อนแล้วค่ะ) -->
             <div class="debt-summary">
                 <p>ยอดค้างชำระปัจจุบัน</p>
                 <h1 id="display-total-debt">฿0.00</h1>
             </div>
 
-            <!-- กล่องบริการตัวเอง (เส้นทึบสีส้ม พื้นขาว) -->
+            <!-- กล่องบริการตัวเอง (ขนาดเท่าเพื่อน เส้นทึบสีส้ม) -->
             <div class="self-service-box">
                 <p>แอดมินไม่อยู่ หรือ ต้องการหยิบสินค้าเอง?</p>
                 <button class="btn-self-record" onclick="selfRecordDebt()">
@@ -220,7 +219,7 @@
         </div>
     </div>
     
-    <!-- ส่วนท้ายเว็บ (Footer สีเทาอ่อน) -->
+    <!-- ส่วนท้ายเว็บ (Footer) -->
     <div class="footer">
         จัดทำโดย<br>
         ระบบสหกรณ์โรงเรียนบ้านหาดส้มแป้น
@@ -249,7 +248,7 @@
         window.showMobileManual = function() {
             Swal.fire({
                 title: '📖 คู่มือการใช้งาน',
-                heightAuto: false, // ป้องกันจอกระโดดเมื่อเปิด Popup
+                heightAuto: false, // ป้องกันจอกระโดด
                 html: `
                 <div style="text-align: left; font-size: 0.95rem; line-height: 1.6; color: #2D3748; padding-top: 10px;">
                     <div style="background: #F8FAFC; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #1A365D;">
@@ -280,15 +279,11 @@
             if (e.key === 'Enter') checkData();
         });
 
+        // ฟังก์ชันแปลงเลขไทย
         function toArabic(text) { const t=['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙']; return text.replace(/[๐-๙]/g, m => t.indexOf(m)); }
         
         async function checkData() {
-            let inputEl = document.getElementById('member-id');
-            let rawId = inputEl.value.trim();
-            
-            // ปิดคีย์บอร์ดและเคลียร์โฟกัส ป้องกันการเด้งกระโดดของหน้าจอ
-            inputEl.blur(); 
-            
+            let rawId = document.getElementById('member-id').value.trim();
             if (!rawId) return Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาระบุรหัสประจำตัวก่อนค่ะ', heightAuto: false});
             
             let id = toArabic(rawId);
@@ -309,6 +304,7 @@
 
                 const memberData = doc.data();
                 
+                // เก็บข้อมูลคนล็อกอินไว้ใช้ตอนบันทึกของเอง
                 currentUserId = id;
                 currentUserName = memberData.name;
                 currentUserClass = memberData.class || 'ครู';
@@ -320,10 +316,6 @@
 
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('result-section').style.display = 'block';
-                
-                // เลื่อนหน้าจอขึ้นเบาๆ เผื่อกรณีที่คีย์บอร์ดดันจอลงไปลึก
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-
                 Swal.close();
 
             } catch (e) {
@@ -390,7 +382,6 @@
             document.getElementById('member-id').value = '';
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ==========================================
