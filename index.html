@@ -25,9 +25,14 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
         
-        body { 
+        /* 🚀 แก้ปัญหาจอกระโดด: ใช้ height: 100% แทน vh เพื่อไม่ให้มือถือคำนวณจอใหม่ตอนคีย์บอร์ดเด้ง */
+        html, body {
             background-color: #EDF2F7; color: var(--text-dark); 
-            display: flex; flex-direction: column; min-height: 100vh;
+            height: 100%; margin: 0; padding: 0;
+        }
+        
+        .main-wrapper {
+            display: flex; flex-direction: column; min-height: 100%;
         }
         
         /* 📱 Header */
@@ -97,21 +102,21 @@
         .profile-info p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
         .btn-logout { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
-        /* 🔴 ยอดค้างชำระ (แดงพาสเทล ละมุนตา ขนาดเท่ากล่องอื่น) */
+        /* 🔴 ยอดค้างชำระ (แดงพาสเทล ละมุนตา ไม่ตะโกน) */
         .debt-summary { 
-            background: #FFF5F5; padding: 20px; border-radius: 12px; text-align: center; 
-            border: 2px solid #FEB2B2; box-shadow: 0 4px 15px rgba(229, 62, 62, 0.1); margin-bottom: 20px; 
+            background: #FFF5F5; padding: 15px 20px; border-radius: 12px; text-align: center; 
+            border: 2px solid #FEB2B2; box-shadow: 0 2px 8px rgba(229, 62, 62, 0.08); margin-bottom: 20px; 
         }
-        .debt-summary p { font-size: 1rem; font-weight: 500; margin-bottom: 5px; color: #C53030;}
-        .debt-summary h1 { font-size: 2.5rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
+        .debt-summary p { font-size: 0.9rem; font-weight: 500; margin-bottom: 2px; color: #C53030; opacity: 0.9;}
+        .debt-summary h1 { font-size: 2.2rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
 
-        /* 🛒 กล่องบริการตัวเอง (เส้นทึบสีส้ม พื้นขาว) */
+        /* 🛒 กล่องบริการตัวเอง (เส้นทึบสีส้ม พื้นขาว คลีนๆ) */
         .self-service-box {
-            background: white; padding: 20px; border-radius: 12px; text-align: center; 
-            margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            background: white; padding: 18px 15px; border-radius: 12px; text-align: center; 
+            margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); 
             border: 2px solid var(--warning-orange); 
         }
-        .self-service-box p { color: var(--text-dark); font-weight: 500; font-size: 1rem; margin-bottom: 12px; }
+        .self-service-box p { color: var(--text-dark); font-weight: 500; font-size: 0.95rem; margin-bottom: 12px; }
         .btn-self-record { 
             width: 100%; padding: 14px; background: var(--warning-orange); color: white; 
             border: none; border-radius: 8px; font-size: 1.05rem; cursor: pointer; 
@@ -135,7 +140,7 @@
         
         .empty-state { text-align: center; padding: 30px 10px; color: #A0AEC0; font-size: 0.95rem; }
 
-        /* 📖 ปุ่มคู่มือ */
+        /* 📖 ปุ่มคู่มือ (สีน้ำเงิน) */
         #floating-manual-btn { 
             position: fixed; bottom: 25px; right: 25px; z-index: 999; 
             background-color: var(--primary-blue); color: white; border: none; border-radius: 50%; 
@@ -143,16 +148,20 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; 
         }
 
-        /* 🏢 Footer */
+        /* 🏢 Footer สีเทาอ่อน */
         .footer {
             text-align: center; font-size: 0.8rem; color: #A0AEC0;
             padding: 20px 10px; margin-top: auto; line-height: 1.5; opacity: 0.8;
         }
+
+        /* 🚀 ดักจับ Popup ของ SweetAlert ไม่ให้ยุ่งกับหน้าจอเรา */
+        body.swal2-shown { padding-right: 0 !important; overflow-y: auto !important; }
     </style>
 </head>
 <body>
+<div class="main-wrapper">
 
-    <!-- ปุ่มคู่มือ -->
+    <!-- ปุ่มคู่มือ สีน้ำเงินเข้าธีม -->
     <button id="floating-manual-btn" onclick="showMobileManual()">📖</button>
 
     <div class="header">
@@ -197,13 +206,13 @@
                 <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
             </div>
 
-            <!-- กล่องยอดค้างชำระ -->
+            <!-- กล่องยอดค้างชำระ (แดงพาสเทล ละมุนตา ไม่ตะโกน) -->
             <div class="debt-summary">
                 <p>ยอดค้างชำระปัจจุบัน</p>
                 <h1 id="display-total-debt">฿0.00</h1>
             </div>
 
-            <!-- กล่องบริการตัวเอง -->
+            <!-- กล่องบริการตัวเอง (เส้นทึบสีส้ม พื้นขาว คลีนๆ) -->
             <div class="self-service-box">
                 <p>แอดมินไม่อยู่ หรือ ต้องการหยิบสินค้าเอง?</p>
                 <button class="btn-self-record" onclick="selfRecordDebt()">
@@ -219,13 +228,21 @@
         </div>
     </div>
     
-    <!-- ส่วนท้ายเว็บ (Footer) -->
+    <!-- ส่วนท้ายเว็บ (Footer สีเทาอ่อน ไม่กวนสายตา) -->
     <div class="footer">
         จัดทำโดย<br>
         ระบบสหกรณ์โรงเรียนบ้านหาดส้มแป้น
     </div>
 
+</div> <!-- ปิด main-wrapper -->
+
     <script>
+        // 🚀 เวทมนตร์สั่งห้าม SweetAlert ยุ่งกับหน้าจอเด็ดขาด (แก้จอกระโดด 100%)
+        const appSwal = Swal.mixin({
+            heightAuto: false,       // ห้ามคำนวณความสูงจอใหม่
+            scrollbarPadding: false  // ห้ามซ่อน Scrollbar จนจอกระตุก
+        });
+
         // ใช้ฐานข้อมูลเดียวกันกับระบบหลัก
         const firebaseConfig = {
             apiKey: "AIzaSyAYaXrrNOCRbC7uDVc4tXHMDQcSiwswxoo",
@@ -241,15 +258,14 @@
         let currentUserId = '';
         let currentUserName = '';
         let currentUserClass = '';
-        let unsubscribeTransactions = null; // ตัวแปรเก็บสถานะการดึงข้อมูลเรียลไทม์
+        let unsubscribeTransactions = null;
 
         // ==========================================
-        // 📖 ระบบคู่มือการใช้งาน
+        // 📖 ระบบคู่มือการใช้งาน (Manual)
         // ==========================================
         window.showMobileManual = function() {
-            Swal.fire({
+            appSwal.fire({
                 title: '📖 คู่มือการใช้งาน',
-                heightAuto: false, // ป้องกันจอกระโดด
                 html: `
                 <div style="text-align: left; font-size: 0.95rem; line-height: 1.6; color: #2D3748; padding-top: 10px;">
                     <div style="background: #F8FAFC; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #1A365D;">
@@ -285,56 +301,60 @@
             let inputEl = document.getElementById('member-id');
             let rawId = inputEl.value.trim();
             
-            inputEl.blur(); // ปิดคีย์บอร์ดมือถือ ป้องกันจอกระโดด
+            // 🚀 ปิดคีย์บอร์ดนุ่มนวล
+            inputEl.blur(); 
             
-            if (!rawId) return Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาระบุรหัสประจำตัวก่อนค่ะ', heightAuto: false});
+            if (!rawId) return appSwal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาระบุรหัสประจำตัวก่อนค่ะ'});
             
-            let id = toArabic(rawId);
-            Swal.fire({ title: 'กำลังดึงข้อมูล...', allowOutsideClick: false, heightAuto: false, didOpen: () => Swal.showLoading() });
+            // 🚀 หน่วงเวลา 0.15 วิ ให้คีย์บอร์ดมือถือยุบตัวเสร็จก่อน ค่อยทำงานต่อ (กันจอกระโดด)
+            setTimeout(async () => {
+                let id = toArabic(rawId);
+                appSwal.fire({ title: 'กำลังดึงข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-            try {
-                let doc = await db.collection("members").doc(id).get();
-                if (!doc.exists) {
-                    let strippedVal = id.replace(/^0+/, '');
-                    if (strippedVal === '') strippedVal = '0';
-                    let strippedDoc = await db.collection("members").doc(strippedVal).get();
-                    if (strippedDoc.exists) { doc = strippedDoc; id = strippedVal; }
+                try {
+                    let doc = await db.collection("members").doc(id).get();
+                    if (!doc.exists) {
+                        let strippedVal = id.replace(/^0+/, '');
+                        if (strippedVal === '') strippedVal = '0';
+                        let strippedDoc = await db.collection("members").doc(strippedVal).get();
+                        if (strippedDoc.exists) { doc = strippedDoc; id = strippedVal; }
+                    }
+
+                    if (!doc.exists) {
+                        return appSwal.fire({icon: 'error', title: 'ไม่พบข้อมูล', text: 'รหัสประจำตัวไม่ถูกต้อง หรือไม่มีในระบบ', confirmButtonColor: '#7f0101'});
+                    }
+
+                    const memberData = doc.data();
+                    
+                    currentUserId = id;
+                    currentUserName = memberData.name;
+                    currentUserClass = memberData.class || 'ครู';
+
+                    document.getElementById('display-name').innerText = currentUserName;
+                    document.getElementById('display-id').innerText = `รหัส: ${currentUserId} | ชั้น: ${currentUserClass}`;
+
+                    // เริ่ม Real-time ทันที
+                    startRealtimeListener();
+
+                    // สลับหน้าจอเบาๆ ไม่มีการ Scroll กระชากแล้ว
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('result-section').style.display = 'block';
+                    
+                    appSwal.close();
+
+                } catch (e) {
+                    console.error(e);
+                    appSwal.fire({icon: 'error', title: 'ข้อผิดพลาด', text: 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้'});
                 }
-
-                if (!doc.exists) {
-                    return Swal.fire({icon: 'error', title: 'ไม่พบข้อมูล', text: 'รหัสประจำตัวไม่ถูกต้อง หรือไม่มีในระบบ', confirmButtonColor: '#7f0101', heightAuto: false});
-                }
-
-                const memberData = doc.data();
-                
-                currentUserId = id;
-                currentUserName = memberData.name;
-                currentUserClass = memberData.class || 'ครู';
-
-                document.getElementById('display-name').innerText = currentUserName;
-                document.getElementById('display-id').innerText = `รหัส: ${currentUserId} | ชั้น: ${currentUserClass}`;
-
-                // 🚀 เปลี่ยนมาเรียกใช้ Listener แบบ Real-time แทน
-                startRealtimeListener();
-
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('result-section').style.display = 'block';
-                
-                Swal.close();
-
-            } catch (e) {
-                console.error(e);
-                Swal.fire({icon: 'error', title: 'ข้อผิดพลาด', text: 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', heightAuto: false});
-            }
+            }, 150); // รอ 150 มิลลิวินาที
         }
 
         // ==========================================
         // ฟังก์ชัน: ให้ผู้ใช้บันทึกยอดหนี้ด้วยตัวเอง
         // ==========================================
         window.selfRecordDebt = async function() {
-            const { value: amount } = await Swal.fire({
+            const { value: amount } = await appSwal.fire({
                 title: '🛒 บันทึกซื้อสินค้า (แปะโป้ง)',
-                heightAuto: false, // ป้องกันจอกระโดด
                 html: `
                     <p style="font-size: 0.9rem; color: #4A5568; margin-bottom: 10px;">ระบบจะบันทึกยอดนี้เป็น <b>"รายการค้างชำระ"</b> ในบัญชีของคุณทันที</p>
                     <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุยอดเงิน (บาท):</label>
@@ -353,11 +373,10 @@
             });
 
             if (amount) {
-                Swal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, heightAuto: false, didOpen: () => Swal.showLoading() });
+                appSwal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 try {
                     const todayDate = new Date().toLocaleDateString('en-CA');
                     
-                    // บันทึกบิลเป็นสถานะ unpaid เข้าฐานข้อมูลทันที
                     await db.collection("transactions").add({
                         member_id: currentUserId,
                         member_name: currentUserName,
@@ -370,18 +389,17 @@
                         recorded_by: 'ผู้ใช้บันทึกเองทางมือถือ'
                     });
                     
-                    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เพิ่มยอดค้างชำระ ฿${amount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false, heightAuto: false });
+                    appSwal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เพิ่มยอดค้างชำระ ฿${amount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false });
                     
-                    // 🚀 ไม่ต้องสั่งโหลดอะไรใหม่เลย เพราะระบบ Real-time จะเด้งตัวเลขอัปเดตให้เองอัตโนมัติ (จอไม่เด้งแน่นอน!)
+                    // ระบบ Real-time จะจัดการอัปเดตเลขหน้าจอเอง ไม่ต้องรีโหลดใหม่ ไม่กระโดด!
                 } catch (e) {
                     console.error(e);
-                    Swal.fire({icon: 'error', title: 'Error', text: 'ไม่สามารถบันทึกข้อมูลได้', heightAuto: false});
+                    appSwal.fire({icon: 'error', title: 'Error', text: 'ไม่สามารถบันทึกข้อมูลได้'});
                 }
             }
         }
 
         function logout() {
-            // ยกเลิกการฟังข้อมูลเรียลไทม์เพื่อไม่ให้เปลืองเน็ต
             if (unsubscribeTransactions) {
                 unsubscribeTransactions();
                 unsubscribeTransactions = null;
@@ -393,14 +411,13 @@
         }
 
         // ==========================================
-        // 🚀 ระบบดึงข้อมูลแบบ Real-time ของแท้! (แทนที่ระบบแอบ Refresh เก่า)
+        // 🚀 ระบบดึงข้อมูลแบบ Real-time ของแท้!
         // ==========================================
         function startRealtimeListener() {
             if (unsubscribeTransactions) {
                 unsubscribeTransactions();
             }
 
-            // ใช้ onSnapshot เฝ้าดูการเปลี่ยนแปลงตลอดเวลาแบบเสี้ยววินาที!
             unsubscribeTransactions = db.collection("transactions")
                 .where("member_id", "==", currentUserId)
                 .onSnapshot((snapshot) => {
@@ -436,7 +453,6 @@
                         }
                     });
 
-                    // อัปเดตหน้าจอทันทีที่มีคนเคลียร์บิล หรือ ซื้อของเพิ่ม
                     document.getElementById('display-total-debt').innerText = `฿${totalDebt.toFixed(2)}`;
                     document.getElementById('unpaid-list').innerHTML = unpaidHtml || '<div class="empty-state">🎉 ไม่มีรายการค้างชำระ</div>';
                     document.getElementById('paid-list').innerHTML = paidHtml || '<div class="empty-state">ยังไม่มีประวัติการทำรายการ</div>';
