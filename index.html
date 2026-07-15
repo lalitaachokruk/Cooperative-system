@@ -269,6 +269,60 @@
             document.getElementById('login-section').style.display = 'block';
             document.getElementById('member-id').focus();
         }
+        // ==========================================
+        // ฟังก์ชัน รีเฟรชข้อมูลอัตโนมัติ (ทุก 2 นาที) แบบไม่กระพริบ
+        // ==========================================
+        setInterval(() => {
+            // ถ้าระบบจำได้ว่ามีคนล็อกอินอยู่ (ไม่ได้อยู่หน้าค้นหา) ให้แอบรีเฟรชข้อมูลเงียบๆ
+            if (currentUserId !== '') {
+                silentRefreshData();
+            }
+        }, 120000); // 120000 มิลลิวินาที = 2 นาที
+
+        async function silentRefreshData() {
+            try {
+                // ดึงประวัติบิลทั้งหมดใหม่
+                const transSnap = await db.collection("transactions").where("member_id", "==", currentUserId).get();
+                let transactions = [];
+                transSnap.forEach(t => { 
+                    let d = t.data(); 
+                    transactions.push({ 
+                        date: d.date, status: d.status, amount: d.amount || 0, 
+                        note: d.note || (d.status === 'paid' ? 'ซื้อสินค้า/ชำระแล้ว' : 'ค้างชำระ'),
+                        time: d.timestamp ? d.timestamp.toDate() : new Date() 
+                    }); 
+                });
+
+                transactions.sort((a, b) => b.time - a.time);
+
+                let totalDebt = 0; let unpaidHtml = ''; let paidHtml = '';
+
+                transactions.forEach(t => {
+                    let timeStr = t.time.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    if (t.status === 'unpaid') {
+                        totalDebt += t.amount;
+                        unpaidHtml += `
+                            <div class="bill-card unpaid">
+                                <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:var(--accent-red);">${t.note}</div></div>
+                                <div class="bill-amount" style="color:var(--accent-red);">฿${t.amount.toFixed(2)}</div>
+                            </div>`;
+                    } else {
+                        paidHtml += `
+                            <div class="bill-card paid">
+                                <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:#38A169;">${t.note}</div></div>
+                                <div class="bill-amount" style="color:#38A169;">฿${t.amount.toFixed(2)}</div>
+                            </div>`;
+                    }
+                });
+
+                // อัปเดตหน้าจอโดยไม่ให้ผู้ใช้รู้ตัว (ไม่มีกล่องโหลดเด้งกวนใจ)
+                document.getElementById('display-total-debt').innerText = `฿${totalDebt.toFixed(2)}`;
+                document.getElementById('unpaid-list').innerHTML = unpaidHtml || '<div class="empty-state">🎉 ไม่มีรายการค้างชำระ</div>';
+                document.getElementById('paid-list').innerHTML = paidHtml || '<div class="empty-state">ยังไม่มีประวัติการทำรายการ</div>';
+            } catch (e) {
+                console.error("Silent refresh error:", e);
+            }
+        }
     </script>
 </body>
 </html>
