@@ -25,7 +25,7 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
         
-        /* แก้ไขโครงสร้างให้เลื่อนสมูท และดัน Footer ไว้ล่างสุด */
+        /* ปลดล็อกให้หน้าจอเลื่อนสมูทแบบธรรมชาติของมือถือ ป้องกันอาการจอกระโดดดีดไปมา */
         body { 
             background-color: #EDF2F7; color: var(--text-dark); 
             display: flex; flex-direction: column; min-height: 100vh;
@@ -98,21 +98,21 @@
         .profile-info p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
         .btn-logout { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
-        /* 🔴 ยอดค้างชำระ (ย่อขนาดลงให้พอดี สมส่วน ไม่กระแทกตา) */
+        /* 🔴 ยอดค้างชำระ (บีบขนาดให้เล็กลง สมส่วนพอดี ไม่ใหญ่กระแทกตา) */
         .debt-summary { 
             background: #FFF5F5; padding: 15px 20px; border-radius: 12px; text-align: center; 
-            border: 2px solid #FEB2B2; box-shadow: 0 2px 8px rgba(229, 62, 62, 0.08); margin-bottom: 20px; 
+            border: 2px solid #FEB2B2; margin-bottom: 20px; 
         }
-        .debt-summary p { font-size: 0.85rem; font-weight: 500; margin-bottom: 2px; color: #C53030; opacity: 0.9;}
-        .debt-summary h1 { font-size: 2.2rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
+        .debt-summary p { font-size: 0.9rem; font-weight: 500; margin-bottom: 2px; color: #C53030; opacity: 0.9;}
+        .debt-summary h1 { font-size: 2rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
 
-        /* 🛒 กล่องบริการตัวเอง (เส้นประสีส้ม พื้นขาว คลีนๆ) */
+        /* 🛒 กล่องบริการตัวเอง (เส้นทึบปกติสีส้ม พื้นขาว คลีนๆ) */
         .self-service-box {
-            background: white; padding: 20px 15px; border-radius: 12px; text-align: center; 
-            margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-            border: 2px dashed var(--warning-orange); 
+            background: white; padding: 18px 15px; border-radius: 12px; text-align: center; 
+            margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); 
+            border: 2px solid var(--warning-orange); 
         }
-        .self-service-box p { color: var(--text-dark); font-weight: 500; font-size: 0.95rem; margin-bottom: 15px; }
+        .self-service-box p { color: var(--text-dark); font-weight: 500; font-size: 0.95rem; margin-bottom: 12px; }
         .btn-self-record { 
             width: 100%; padding: 14px; background: var(--warning-orange); color: white; 
             border: none; border-radius: 8px; font-size: 1.05rem; cursor: pointer; 
@@ -198,13 +198,13 @@
                 <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
             </div>
 
-            <!-- กล่องยอดค้างชำระ (แดงพาสเทล ละมุนตา เล็กลง) -->
+            <!-- กล่องยอดค้างชำระ (ลดขนาดให้สมส่วน เล็กลงกำลังดี) -->
             <div class="debt-summary">
                 <p>ยอดค้างชำระปัจจุบัน</p>
                 <h1 id="display-total-debt">฿0.00</h1>
             </div>
 
-            <!-- กล่องบริการตัวเอง (กรอบส้ม พื้นขาว) -->
+            <!-- กล่องบริการตัวเอง (เส้นทึบสีส้ม พื้นขาว) -->
             <div class="self-service-box">
                 <p>แอดมินไม่อยู่ หรือ ต้องการหยิบสินค้าเอง?</p>
                 <button class="btn-self-record" onclick="selfRecordDebt()">
@@ -220,7 +220,7 @@
         </div>
     </div>
     
-    <!-- ส่วนท้ายเว็บ (Footer สีเทาอ่อน จางๆ) -->
+    <!-- ส่วนท้ายเว็บ (Footer สีเทาอ่อน) -->
     <div class="footer">
         จัดทำโดย<br>
         ระบบสหกรณ์โรงเรียนบ้านหาดส้มแป้น
@@ -286,7 +286,7 @@
             let inputEl = document.getElementById('member-id');
             let rawId = inputEl.value.trim();
             
-            // ปิดคีย์บอร์ดมือถือทันทีก่อนประมวลผล ป้องกันจอกระโดด
+            // ปิดคีย์บอร์ดและเคลียร์โฟกัส ป้องกันการเด้งกระโดดของหน้าจอ
             inputEl.blur(); 
             
             if (!rawId) return Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาระบุรหัสประจำตัวก่อนค่ะ', heightAuto: false});
@@ -320,6 +320,10 @@
 
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('result-section').style.display = 'block';
+                
+                // เลื่อนหน้าจอขึ้นเบาๆ เผื่อกรณีที่คีย์บอร์ดดันจอลงไปลึก
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
                 Swal.close();
 
             } catch (e) {
@@ -334,7 +338,7 @@
         window.selfRecordDebt = async function() {
             const { value: amount } = await Swal.fire({
                 title: '🛒 บันทึกซื้อสินค้า (แปะโป้ง)',
-                heightAuto: false, // ป้องกันจอกระโดดเมื่อเปิด Popup
+                heightAuto: false, // ป้องกันจอกระโดด
                 html: `
                     <p style="font-size: 0.9rem; color: #4A5568; margin-bottom: 10px;">ระบบจะบันทึกยอดนี้เป็น <b>"รายการค้างชำระ"</b> ในบัญชีของคุณทันที</p>
                     <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุยอดเงิน (บาท):</label>
@@ -386,6 +390,7 @@
             document.getElementById('member-id').value = '';
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ==========================================
