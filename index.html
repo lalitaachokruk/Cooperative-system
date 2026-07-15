@@ -25,10 +25,14 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
         
-        /* บังคับโครงสร้างเพื่อดัน Footer ไว้ล่างสุด */
-        body { 
+        /* ล็อกโครงสร้างไม่ให้กระโดดเมื่อคีย์บอร์ดมือถือเด้ง */
+        html, body {
             background-color: #EDF2F7; color: var(--text-dark); 
-            display: flex; flex-direction: column; min-height: 100vh;
+            height: 100%; overscroll-behavior-y: none;
+        }
+        
+        .main-wrapper {
+            display: flex; flex-direction: column; min-height: 100%;
         }
         
         /* 📱 Header */
@@ -38,22 +42,21 @@
             position: sticky; top: 0; z-index: 100;
         }
         
-        /* 🌟 เอฟเฟกต์โลโก้หายใจเข้า-ออกเบาๆ */
         @keyframes pulseLogo {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
         .header img { height: 45px; margin-bottom: 5px; animation: pulseLogo 2.5s infinite ease-in-out; }
-        
         .header h1 { font-size: 1.15rem; color: var(--brand-red); margin: 0; font-weight: 600;}
         
-        .container { padding: 20px 15px; max-width: 600px; margin: 0 auto; flex: 1; width: 100%;}
+        /* ล็อกระยะ Margin ไม่ให้ใช้ % หรือ vh ป้องกันจอกระโดด */
+        .container { padding: 20px 15px; max-width: 600px; margin: 0 auto; flex: 1; width: 100%; }
         
         /* 🔍 กล่องค้นหา (Login) */
         .search-box { 
             background: white; padding: 25px 20px; border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; margin-top: 15px;
         }
         .search-box label { display: block; font-size: 1.05rem; color: var(--primary-blue); font-weight: 500; margin-bottom: 10px; }
         .search-input { 
@@ -67,7 +70,7 @@
             box-shadow: 0 4px 10px rgba(26, 54, 93, 0.2);
         }
         
-        /* ✨ กล่องแนะนำบริการ (ดูโปร ไม่เล่นเกินไป) */
+        /* ✨ กล่องแนะนำบริการ */
         .features-list {
             background: white; padding: 20px; border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
@@ -90,7 +93,7 @@
         /* 👤 ส่วนแสดงผลข้อมูล */
         #result-section { display: none; }
         
-        /* นามบัตร (สีน้ำเงินสวยๆ) */
+        /* นามบัตร (สีน้ำเงิน) */
         .profile-card { 
             background: linear-gradient(135deg, #1A365D, #2B6CB0); color: white; 
             padding: 20px; border-radius: 12px; margin-bottom: 20px; 
@@ -100,21 +103,19 @@
         .profile-info p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
         .btn-logout { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
-        /* 🔴 ยอดค้างชำระ (ปรับขนาดให้เล็กลง สมส่วน) */
+        /* 🔴 ยอดค้างชำระ (อัปเกรดเป็นสีแดงพาสเทล ละมุนตา ผู้ดีมาก) */
         .debt-summary { 
-            background: var(--accent-red); color: white; padding: 20px 20px; 
-            border-radius: 12px; text-align: center; border: 3px solid white; 
-            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.25); margin-bottom: 20px; 
+            background: #FFF5F5; padding: 25px 20px; border-radius: 12px; text-align: center; 
+            border: 2px solid #FEB2B2; box-shadow: 0 4px 15px rgba(229, 62, 62, 0.08); margin-bottom: 20px; 
         }
-        .debt-summary p { font-size: 0.9rem; font-weight: 500; margin-bottom: 5px; opacity: 0.9;}
-        .debt-summary h1 { font-size: 1.8rem; margin: 0; line-height: 1; font-weight: 600;}
+        .debt-summary p { font-size: 0.95rem; font-weight: 500; margin-bottom: 5px; color: #C53030; opacity: 0.9;}
+        .debt-summary h1 { font-size: 2.8rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
 
-        /* 🛒 กล่องบริการตัวเอง (คลีนๆ ใช้ไอคอนถุงช้อปปิ้ง) */
+        /* 🛒 กล่องบริการตัวเอง (ลบไอคอนออก คลีนๆ สวยหรู) */
         .self-service-box {
-            background: white; padding: 20px; border-radius: 12px; text-align: center; 
-            margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
+            background: white; padding: 20px 15px; border-radius: 12px; text-align: center; 
+            margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px dashed #CBD5E0;
         }
-        .self-service-icon { font-size: 2rem; margin-bottom: 10px; }
         .self-service-box p { color: var(--text-dark); font-weight: 500; font-size: 0.95rem; margin-bottom: 15px; }
         .btn-self-record { 
             width: 100%; padding: 14px; background: var(--warning-orange); color: white; 
@@ -125,7 +126,7 @@
 
         .section-title { font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; padding-left: 5px;}
         
-        /* 📜 การ์ดประวัติบิล (พื้นใสแบบเดิมที่สวยแล้ว) */
+        /* 📜 การ์ดประวัติบิล (พื้นใส) */
         .bill-card { 
             background: transparent; padding: 15px; border-radius: 10px; 
             border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;
@@ -139,7 +140,7 @@
         
         .empty-state { text-align: center; padding: 30px 10px; color: #A0AEC0; font-size: 0.95rem; }
 
-        /* 📖 ปุ่มคู่มือ (เปลี่ยนเป็นสีน้ำเงิน) */
+        /* 📖 ปุ่มคู่มือ (สีน้ำเงินเข้าธีม) */
         #floating-manual-btn { 
             position: fixed; bottom: 25px; right: 25px; z-index: 999; 
             background-color: var(--primary-blue); color: white; border: none; border-radius: 50%; 
@@ -147,7 +148,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; 
         }
 
-        /* 🏢 Footer แบบลายน้ำจางๆ สบายตา */
+        /* 🏢 Footer สีเทาอ่อน ไม่กวนสายตา */
         .footer {
             text-align: center; font-size: 0.8rem; color: #A0AEC0;
             padding: 20px 10px; margin-top: auto; line-height: 1.5; opacity: 0.8;
@@ -155,8 +156,9 @@
     </style>
 </head>
 <body>
+<div class="main-wrapper">
 
-    <!-- ปุ่มคู่มือ สีน้ำเงินเข้าธีม -->
+    <!-- ปุ่มคู่มือ -->
     <button id="floating-manual-btn" onclick="showMobileManual()">📖</button>
 
     <div class="header">
@@ -170,11 +172,10 @@
             <div class="search-box">
                 <label>ตรวจสอบยอด และ บันทึกการซื้อ</label>
                 <input type="number" id="member-id" class="search-input" placeholder="พิมพ์รหัสประจำตัว (เช่น 0004)" autocomplete="off">
-                <!-- เพิ่มไอคอนแว่นขยาย -->
                 <button class="btn-search" onclick="checkData()">🔍 เข้าสู่ระบบ</button>
             </div>
             
-            <!-- กล่องแนะนำบริการ (ปรับใหม่ดูโปรขึ้น) -->
+            <!-- กล่องแนะนำบริการ -->
             <div class="features-list">
                 <h3>📱 บริการระบบสมาชิก (E-Service)</h3>
                 <div class="feature-item">
@@ -202,15 +203,14 @@
                 <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
             </div>
 
-            <!-- กล่องยอดค้างชำระ (ลดขนาดให้สวยพอดี ไม่กระแทกตา) -->
+            <!-- กล่องยอดค้างชำระ (แดงพาสเทล ละมุนตา ไม่ตะโกน) -->
             <div class="debt-summary">
                 <p>ยอดค้างชำระปัจจุบัน</p>
                 <h1 id="display-total-debt">฿0.00</h1>
             </div>
 
-            <!-- กล่องบริการตัวเอง (เปลี่ยนไอคอนเป็นถุงช้อปปิ้ง) -->
+            <!-- กล่องบริการตัวเอง (ลบไอคอนออก คลีนๆ สบายตา) -->
             <div class="self-service-box">
-                <div class="self-service-icon">🛍️</div>
                 <p>แอดมินไม่อยู่ หรือ ต้องการหยิบสินค้าเอง?</p>
                 <button class="btn-self-record" onclick="selfRecordDebt()">
                     🛒 บันทึกยอดซื้อด้วยตัวเอง (แปะโป้ง)
@@ -225,11 +225,13 @@
         </div>
     </div>
     
-    <!-- ส่วนท้ายเว็บ (Footer สีเทาอ่อน ไม่กวนสายตา) -->
+    <!-- ส่วนท้ายเว็บ (Footer สีเทาอ่อนจางๆ) -->
     <div class="footer">
         จัดทำโดย<br>
         ระบบสหกรณ์โรงเรียนบ้านหาดส้มแป้น
     </div>
+
+</div> <!-- ปิด main-wrapper -->
 
     <script>
         // ใช้ฐานข้อมูลเดียวกันกับระบบหลัก
