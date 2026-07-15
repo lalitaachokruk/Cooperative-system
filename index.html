@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ตรวจสอบยอดค้างชำระ - สหกรณ์โรงเรียนบ้านหาดส้มแป้น</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root { --primary-blue: #1A365D; --accent-red: #E53E3E; --bg-gray: #F7FAFC; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
+        body { background-color: #EDF2F7; color: #2D3748; }
+        
+        .header { background: white; padding: 15px 20px; text-align: center; border-bottom: 3px solid #7f0101; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100;}
+        .header img { height: 45px; margin-bottom: 5px; }
+        .header h1 { font-size: 1.1rem; color: var(--primary-blue); margin: 0; }
+        
+        .container { padding: 20px 15px; max-width: 600px; margin: 0 auto; }
+        
+        /* กล่องค้นหา */
+        .search-box { background: white; padding: 25px 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; }
+        .search-box label { display: block; font-size: 1rem; color: var(--primary-blue); font-weight: 500; margin-bottom: 10px; }
+        .search-input { width: 100%; padding: 15px; font-size: 1.2rem; border: 2px solid #E2E8F0; border-radius: 8px; text-align: center; outline: none; transition: 0.3s; margin-bottom: 15px; background: var(--bg-gray); }
+        .search-input:focus { border-color: #3182CE; background: white; }
+        .btn-search { width: 100%; padding: 15px; background: var(--primary-blue); color: white; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; font-weight: 500; box-shadow: 0 4px 10px rgba(26, 54, 93, 0.2); }
+        
+        /* ส่วนแสดงผลข้อมูล */
+        #result-section { display: none; }
+        .profile-card { background: linear-gradient(135deg, #1A365D, #2B6CB0); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(43, 108, 176, 0.3); display: flex; align-items: center; justify-content: space-between;}
+        .profile-info h2 { font-size: 1.2rem; margin: 0 0 5px 0; }
+        .profile-info p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
+        .btn-logout { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+
+        .debt-summary { background: white; padding: 20px; border-radius: 12px; text-align: center; border: 2px solid #FEB2B2; margin-bottom: 20px; }
+        .debt-summary p { font-size: 1rem; color: var(--accent-red); font-weight: 600; margin-bottom: 5px; }
+        .debt-summary h1 { font-size: 2.5rem; color: var(--accent-red); margin: 0; line-height: 1; }
+
+        .section-title { font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; padding-left: 5px;}
+        
+        /* การ์ดประวัติบิล */
+        .bill-card { background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #CBD5E0; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+        .bill-card.unpaid { border-left-color: var(--accent-red); }
+        .bill-card.paid { border-left-color: #38A169; }
+        .bill-date { font-size: 0.85rem; color: #718096; margin-bottom: 4px; }
+        .bill-status { font-size: 0.9rem; font-weight: 500; }
+        .bill-amount { font-size: 1.2rem; font-weight: 600; }
+        
+        .empty-state { text-align: center; padding: 30px 10px; color: #A0AEC0; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="https://www.banhadsompan.ac.th/_files_school/86101511/data/86101511_0_20240629-000624.png" alt="โลโก้">
+        <h1>ระบบเช็คยอดสหกรณ์ออนไลน์</h1>
+    </div>
+
+    <div class="container">
+        <!-- หน้าเข้าสู่ระบบ -->
+        <div id="login-section" class="search-box">
+            <label>ตรวจสอบยอดค้างชำระ / ประวัติการซื้อ</label>
+            <input type="text" id="member-id" class="search-input" placeholder="พิมพ์รหัสประจำตัว (เช่น 0004)" autocomplete="off">
+            <button class="btn-search" onclick="checkData()">🔍 ค้นหาข้อมูล</button>
+        </div>
+
+        <!-- หน้าแสดงข้อมูลส่วนตัว -->
+        <div id="result-section">
+            <div class="profile-card">
+                <div class="profile-info">
+                    <h2 id="display-name">ชื่อ - นามสกุล</h2>
+                    <p id="display-id">รหัส: - | ชั้น: -</p>
+                </div>
+                <button class="btn-logout" onclick="logout()">เปลี่ยนคน</button>
+            </div>
+
+            <div class="debt-summary">
+                <p>ยอดค้างชำระปัจจุบัน</p>
+                <h1 id="display-total-debt">฿0.00</h1>
+            </div>
+
+            <h3 class="section-title">🔴 รายการค้างชำระ (ยังไม่จ่าย)</h3>
+            <div id="unpaid-list"></div>
+
+            <h3 class="section-title" style="margin-top: 25px;">🟢 ประวัติการซื้อ / จ่ายชำระแล้ว</h3>
+            <div id="paid-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // ใช้ฐานข้อมูลเดียวกันกับระบบหลัก
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYaXrrNOCRbC7uDVc4tXHMDQcSiwswxoo",
+            authDomain: "school-cooperative-system.firebaseapp.com",
+            projectId: "school-cooperative-system",
+            storageBucket: "school-cooperative-system.firebasestorage.app",
+            messagingSenderId: "383328934393",
+            appId: "1:383328934393:web:0a326b1e0098b7d6cf4528"
+        };
+        firebase.initializeApp(firebaseConfig); 
+        const db = firebase.firestore();
+
+        // กด Enter เพื่อค้นหาได้
+        document.getElementById('member-id').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkData();
+        });
+
+        // ฟังก์ชันแปลงเลขไทย/จัดการเลข 0 (เหมือนระบบหลัก)
+        function toArabic(text) { const t=['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙']; return text.replace(/[๐-๙]/g, m => t.indexOf(m)); }
+        
+        async function checkData() {
+            let rawId = document.getElementById('member-id').value.trim();
+            if (!rawId) return Swal.fire('แจ้งเตือน', 'กรุณาระบุรหัสประจำตัวก่อนค่ะ', 'warning');
+            
+            let id = toArabic(rawId);
+            Swal.fire({ title: 'กำลังค้นหา...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            try {
+                // ค้นหารายชื่อจากฐานข้อมูล (รองรับทั้ง 0004 และ 4)
+                let doc = await db.collection("members").doc(id).get();
+                if (!doc.exists) {
+                    let strippedVal = id.replace(/^0+/, '');
+                    if (strippedVal === '') strippedVal = '0';
+                    let strippedDoc = await db.collection("members").doc(strippedVal).get();
+                    if (strippedDoc.exists) { doc = strippedDoc; id = strippedVal; }
+                }
+
+                if (!doc.exists) {
+                    return Swal.fire('ไม่พบข้อมูล', 'รหัสประจำตัวไม่ถูกต้อง หรือไม่มีในระบบ', 'error');
+                }
+
+                const memberData = doc.data();
+                document.getElementById('display-name').innerText = memberData.name;
+                document.getElementById('display-id').innerText = `รหัส: ${id} | ชั้น: ${memberData.class || 'ครู'}`;
+
+                // ดึงประวัติบิลทั้งหมดของคนนี้
+                const transSnap = await db.collection("transactions").where("member_id", "==", id).get();
+                let transactions = [];
+                transSnap.forEach(t => { 
+                    let d = t.data(); 
+                    transactions.push({ 
+                        date: d.date, 
+                        status: d.status, 
+                        amount: d.amount || 0, 
+                        note: d.note || (d.status === 'paid' ? 'ซื้อสินค้า/ชำระแล้ว' : 'ค้างชำระ'),
+                        time: d.timestamp ? d.timestamp.toDate() : new Date() 
+                    }); 
+                });
+
+                // เรียงบิลจาก ใหม่สุด -> เก่าสุด
+                transactions.sort((a, b) => b.time - a.time);
+
+                let totalDebt = 0;
+                let unpaidHtml = '';
+                let paidHtml = '';
+
+                transactions.forEach(t => {
+                    let timeStr = t.time.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    if (t.status === 'unpaid') {
+                        totalDebt += t.amount;
+                        unpaidHtml += `
+                            <div class="bill-card unpaid">
+                                <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:var(--accent-red);">${t.note}</div></div>
+                                <div class="bill-amount" style="color:var(--accent-red);">฿${t.amount.toFixed(2)}</div>
+                            </div>`;
+                    } else {
+                        paidHtml += `
+                            <div class="bill-card paid">
+                                <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:#38A169;">${t.note}</div></div>
+                                <div class="bill-amount" style="color:#38A169;">฿${t.amount.toFixed(2)}</div>
+                            </div>`;
+                    }
+                });
+
+                // แสดงผลลงหน้าจอ
+                document.getElementById('display-total-debt').innerText = `฿${totalDebt.toFixed(2)}`;
+                document.getElementById('unpaid-list').innerHTML = unpaidHtml || '<div class="empty-state">🎉 ไม่มีรายการค้างชำระ</div>';
+                document.getElementById('paid-list').innerHTML = paidHtml || '<div class="empty-state">ยังไม่มีประวัติการทำรายการ</div>';
+
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('result-section').style.display = 'block';
+                Swal.close();
+
+            } catch (e) {
+                console.error(e);
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
+            }
+        }
+
+        function logout() {
+            document.getElementById('member-id').value = '';
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('member-id').focus();
+        }
+    </script>
+</body>
+</html>
