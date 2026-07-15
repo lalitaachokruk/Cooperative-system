@@ -38,6 +38,10 @@
         .debt-summary p { font-size: 1rem; color: var(--accent-red); font-weight: 600; margin-bottom: 5px; }
         .debt-summary h1 { font-size: 2.5rem; color: var(--accent-red); margin: 0; line-height: 1; }
 
+        /* ปุ่มใหม่: บันทึกค้างชำระตัวเอง */
+        .btn-self-record { width: 100%; padding: 14px; background: #DD6B20; color: white; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; font-weight: 500; box-shadow: 0 4px 10px rgba(221, 107, 32, 0.3); margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s;}
+        .btn-self-record:active { transform: scale(0.98); }
+
         .section-title { font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; padding-left: 5px;}
         
         /* การ์ดประวัติบิล */
@@ -61,9 +65,9 @@
     <div class="container">
         <!-- หน้าเข้าสู่ระบบ -->
         <div id="login-section" class="search-box">
-            <label>ตรวจสอบยอดค้างชำระ / ประวัติการซื้อ</label>
-            <input type="text" id="member-id" class="search-input" placeholder="พิมพ์รหัสประจำตัว (เช่น 0004)" autocomplete="off">
-            <button class="btn-search" onclick="checkData()">🔍 ค้นหาข้อมูล</button>
+            <label>ตรวจสอบยอด และ บันทึกการซื้อ</label>
+            <input type="number" id="member-id" class="search-input" placeholder="พิมพ์รหัสประจำตัว (เช่น 0004)" autocomplete="off">
+            <button class="btn-search" onclick="checkData()">🔍 เข้าสู่ระบบ</button>
         </div>
 
         <!-- หน้าแสดงข้อมูลส่วนตัว -->
@@ -73,12 +77,17 @@
                     <h2 id="display-name">ชื่อ - นามสกุล</h2>
                     <p id="display-id">รหัส: - | ชั้น: -</p>
                 </div>
-                <button class="btn-logout" onclick="logout()">เปลี่ยนคน</button>
+                <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
             </div>
 
             <div class="debt-summary">
                 <p>ยอดค้างชำระปัจจุบัน</p>
                 <h1 id="display-total-debt">฿0.00</h1>
+                
+                <!-- ปุ่มเวทมนตร์ สำหรับคีย์ซื้อของเอง -->
+                <button class="btn-self-record" onclick="selfRecordDebt()">
+                    🛒 ซื้อสินค้าด้วยตัวเอง (แปะโป้ง)
+                </button>
             </div>
 
             <h3 class="section-title">🔴 รายการค้างชำระ (ยังไม่จ่าย)</h3>
@@ -102,12 +111,17 @@
         firebase.initializeApp(firebaseConfig); 
         const db = firebase.firestore();
 
+        // ตัวแปรเก็บข้อมูลคนล็อกอิน
+        let currentUserId = '';
+        let currentUserName = '';
+        let currentUserClass = '';
+
         // กด Enter เพื่อค้นหาได้
         document.getElementById('member-id').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') checkData();
         });
 
-        // ฟังก์ชันแปลงเลขไทย/จัดการเลข 0 (เหมือนระบบหลัก)
+        // ฟังก์ชันแปลงเลขไทย
         function toArabic(text) { const t=['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙']; return text.replace(/[๐-๙]/g, m => t.indexOf(m)); }
         
         async function checkData() {
@@ -115,10 +129,9 @@
             if (!rawId) return Swal.fire('แจ้งเตือน', 'กรุณาระบุรหัสประจำตัวก่อนค่ะ', 'warning');
             
             let id = toArabic(rawId);
-            Swal.fire({ title: 'กำลังค้นหา...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'กำลังดึงข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
-                // ค้นหารายชื่อจากฐานข้อมูล (รองรับทั้ง 0004 และ 4)
                 let doc = await db.collection("members").doc(id).get();
                 if (!doc.exists) {
                     let strippedVal = id.replace(/^0+/, '');
@@ -132,11 +145,17 @@
                 }
 
                 const memberData = doc.data();
-                document.getElementById('display-name').innerText = memberData.name;
-                document.getElementById('display-id').innerText = `รหัส: ${id} | ชั้น: ${memberData.class || 'ครู'}`;
+                
+                // เก็บข้อมูลคนล็อกอินไว้ใช้ตอนบันทึกของเอง
+                currentUserId = id;
+                currentUserName = memberData.name;
+                currentUserClass = memberData.class || 'ครู';
 
-                // ดึงประวัติบิลทั้งหมดของคนนี้
-                const transSnap = await db.collection("transactions").where("member_id", "==", id).get();
+                document.getElementById('display-name').innerText = currentUserName;
+                document.getElementById('display-id').innerText = `รหัส: ${currentUserId} | ชั้น: ${currentUserClass}`;
+
+                // ดึงประวัติบิลทั้งหมด
+                const transSnap = await db.collection("transactions").where("member_id", "==", currentUserId).get();
                 let transactions = [];
                 transSnap.forEach(t => { 
                     let d = t.data(); 
@@ -149,7 +168,7 @@
                     }); 
                 });
 
-                // เรียงบิลจาก ใหม่สุด -> เก่าสุด
+                // เรียงบิล ใหม่ -> เก่า
                 transactions.sort((a, b) => b.time - a.time);
 
                 let totalDebt = 0;
@@ -174,7 +193,6 @@
                     }
                 });
 
-                // แสดงผลลงหน้าจอ
                 document.getElementById('display-total-debt').innerText = `฿${totalDebt.toFixed(2)}`;
                 document.getElementById('unpaid-list').innerHTML = unpaidHtml || '<div class="empty-state">🎉 ไม่มีรายการค้างชำระ</div>';
                 document.getElementById('paid-list').innerHTML = paidHtml || '<div class="empty-state">ยังไม่มีประวัติการทำรายการ</div>';
@@ -189,7 +207,60 @@
             }
         }
 
+        // ==========================================
+        // ฟังก์ชันใหม่: ให้ผู้ใช้บันทึกยอดหนี้ด้วยตัวเอง
+        // ==========================================
+        window.selfRecordDebt = async function() {
+            const { value: amount } = await Swal.fire({
+                title: '🛒 บันทึกซื้อสินค้า (แปะโป้ง)',
+                html: `
+                    <p style="font-size: 0.9rem; color: #4A5568; margin-bottom: 10px;">ระบบจะบันทึกยอดนี้เป็น <b>"รายการค้างชำระ"</b> ในบัญชีของคุณทันที</p>
+                    <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุยอดเงิน (บาท):</label>
+                    <input id="self-debt-amount" type="number" placeholder="เช่น 20, 50" style="width: 100%; padding: 12px; border: 2px solid #DD6B20; border-radius: 8px; font-family: 'Kanit'; font-size: 1.2rem; outline: none; box-sizing: border-box;">
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B20',
+                confirmButtonText: 'บันทึกยอดเงิน',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: () => {
+                    const val = parseFloat(document.getElementById('self-debt-amount').value);
+                    if (isNaN(val) || val <= 0) { Swal.showValidationMessage('กรุณาระบุยอดเงินให้ถูกต้องค่ะ'); return false; }
+                    return val;
+                }
+            });
+
+            if (amount) {
+                Swal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    const todayDate = new Date().toLocaleDateString('en-CA');
+                    
+                    // บันทึกบิลเป็นสถานะ unpaid เข้าฐานข้อมูลทันที
+                    await db.collection("transactions").add({
+                        member_id: currentUserId,
+                        member_name: currentUserName,
+                        member_class: currentUserClass,
+                        amount: amount,
+                        date: todayDate,
+                        status: 'unpaid',
+                        note: 'ซื้อสินค้า (บันทึกด้วยตัวเอง)',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        recorded_by: 'ผู้ใช้บันทึกเองทางมือถือ'
+                    });
+                    
+                    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เพิ่มยอดค้างชำระ ฿${amount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false });
+                    
+                    // โหลดหน้าจอใหม่เพื่ออัปเดตตัวเลข
+                    checkData();
+                } catch (e) {
+                    console.error(e);
+                    Swal.fire('Error', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+                }
+            }
+        }
+
         function logout() {
+            currentUserId = ''; currentUserName = ''; currentUserClass = '';
             document.getElementById('member-id').value = '';
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'block';
