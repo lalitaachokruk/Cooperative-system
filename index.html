@@ -87,7 +87,7 @@
         /* 👤 ส่วนแสดงผลข้อมูล */
         #result-section { display: none; }
         
-        /* นามบัตร (สีน้ำเงิน) - ตั้ง Padding เป็น 20px */
+        /* นามบัตร (สีน้ำเงิน) */
         .profile-card { 
             background: linear-gradient(135deg, #1A365D, #2B6CB0); color: white; 
             padding: 20px; border-radius: 12px; margin-bottom: 20px; 
@@ -97,7 +97,7 @@
         .profile-info p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
         .btn-logout { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
-        /* 🔴 ยอดค้างชำระ (ตั้ง Padding ให้เท่ากล่องอื่น ขนาดสมส่วนพอดี) */
+        /* 🔴 ยอดค้างชำระ (แดงพาสเทล ละมุนตา ขนาดเท่ากล่องอื่น) */
         .debt-summary { 
             background: #FFF5F5; padding: 20px; border-radius: 12px; text-align: center; 
             border: 2px solid #FEB2B2; box-shadow: 0 4px 15px rgba(229, 62, 62, 0.1); margin-bottom: 20px; 
@@ -105,7 +105,7 @@
         .debt-summary p { font-size: 1rem; font-weight: 500; margin-bottom: 5px; color: #C53030;}
         .debt-summary h1 { font-size: 2.5rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
 
-        /* 🛒 กล่องบริการตัวเอง (ตั้ง Padding ให้เท่ากล่องอื่น) */
+        /* 🛒 กล่องบริการตัวเอง (เส้นทึบสีส้ม พื้นขาว) */
         .self-service-box {
             background: white; padding: 20px; border-radius: 12px; text-align: center; 
             margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
@@ -121,7 +121,7 @@
 
         .section-title { font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; padding-left: 5px;}
         
-        /* 📜 การ์ดประวัติบิล */
+        /* 📜 การ์ดประวัติบิล (พื้นใส) */
         .bill-card { 
             background: transparent; padding: 15px; border-radius: 10px; 
             border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;
@@ -197,13 +197,13 @@
                 <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
             </div>
 
-            <!-- กล่องยอดค้างชำระ (ขนาดเท่าเพื่อนแล้วค่ะ) -->
+            <!-- กล่องยอดค้างชำระ -->
             <div class="debt-summary">
                 <p>ยอดค้างชำระปัจจุบัน</p>
                 <h1 id="display-total-debt">฿0.00</h1>
             </div>
 
-            <!-- กล่องบริการตัวเอง (ขนาดเท่าเพื่อน เส้นทึบสีส้ม) -->
+            <!-- กล่องบริการตัวเอง -->
             <div class="self-service-box">
                 <p>แอดมินไม่อยู่ หรือ ต้องการหยิบสินค้าเอง?</p>
                 <button class="btn-self-record" onclick="selfRecordDebt()">
@@ -241,9 +241,10 @@
         let currentUserId = '';
         let currentUserName = '';
         let currentUserClass = '';
+        let unsubscribeTransactions = null; // ตัวแปรเก็บสถานะการดึงข้อมูลเรียลไทม์
 
         // ==========================================
-        // 📖 ระบบคู่มือการใช้งาน (Manual)
+        // 📖 ระบบคู่มือการใช้งาน
         // ==========================================
         window.showMobileManual = function() {
             Swal.fire({
@@ -274,16 +275,18 @@
             });
         };
 
-        // กด Enter เพื่อค้นหาได้
         document.getElementById('member-id').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') checkData();
         });
 
-        // ฟังก์ชันแปลงเลขไทย
         function toArabic(text) { const t=['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙']; return text.replace(/[๐-๙]/g, m => t.indexOf(m)); }
         
         async function checkData() {
-            let rawId = document.getElementById('member-id').value.trim();
+            let inputEl = document.getElementById('member-id');
+            let rawId = inputEl.value.trim();
+            
+            inputEl.blur(); // ปิดคีย์บอร์ดมือถือ ป้องกันจอกระโดด
+            
             if (!rawId) return Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาระบุรหัสประจำตัวก่อนค่ะ', heightAuto: false});
             
             let id = toArabic(rawId);
@@ -304,7 +307,6 @@
 
                 const memberData = doc.data();
                 
-                // เก็บข้อมูลคนล็อกอินไว้ใช้ตอนบันทึกของเอง
                 currentUserId = id;
                 currentUserName = memberData.name;
                 currentUserClass = memberData.class || 'ครู';
@@ -312,10 +314,12 @@
                 document.getElementById('display-name').innerText = currentUserName;
                 document.getElementById('display-id').innerText = `รหัส: ${currentUserId} | ชั้น: ${currentUserClass}`;
 
-                await silentRefreshData(); // เรียกใช้ฟังก์ชันโหลดบิล
+                // 🚀 เปลี่ยนมาเรียกใช้ Listener แบบ Real-time แทน
+                startRealtimeListener();
 
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('result-section').style.display = 'block';
+                
                 Swal.close();
 
             } catch (e) {
@@ -368,8 +372,7 @@
                     
                     Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เพิ่มยอดค้างชำระ ฿${amount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false, heightAuto: false });
                     
-                    // โหลดหน้าจอใหม่เพื่ออัปเดตตัวเลข
-                    checkData();
+                    // 🚀 ไม่ต้องสั่งโหลดอะไรใหม่เลย เพราะระบบ Real-time จะเด้งตัวเลขอัปเดตให้เองอัตโนมัติ (จอไม่เด้งแน่นอน!)
                 } catch (e) {
                     console.error(e);
                     Swal.fire({icon: 'error', title: 'Error', text: 'ไม่สามารถบันทึกข้อมูลได้', heightAuto: false});
@@ -378,6 +381,11 @@
         }
 
         function logout() {
+            // ยกเลิกการฟังข้อมูลเรียลไทม์เพื่อไม่ให้เปลืองเน็ต
+            if (unsubscribeTransactions) {
+                unsubscribeTransactions();
+                unsubscribeTransactions = null;
+            }
             currentUserId = ''; currentUserName = ''; currentUserClass = '';
             document.getElementById('member-id').value = '';
             document.getElementById('result-section').style.display = 'none';
@@ -385,57 +393,56 @@
         }
 
         // ==========================================
-        // ฟังก์ชัน รีเฟรชข้อมูลอัตโนมัติ (ทุก 2 นาที)
+        // 🚀 ระบบดึงข้อมูลแบบ Real-time ของแท้! (แทนที่ระบบแอบ Refresh เก่า)
         // ==========================================
-        setInterval(() => {
-            if (currentUserId !== '') {
-                silentRefreshData();
+        function startRealtimeListener() {
+            if (unsubscribeTransactions) {
+                unsubscribeTransactions();
             }
-        }, 120000); 
 
-        async function silentRefreshData() {
-            try {
-                // ดึงประวัติบิลทั้งหมดใหม่
-                const transSnap = await db.collection("transactions").where("member_id", "==", currentUserId).get();
-                let transactions = [];
-                transSnap.forEach(t => { 
-                    let d = t.data(); 
-                    transactions.push({ 
-                        date: d.date, status: d.status, amount: d.amount || 0, 
-                        note: d.note || (d.status === 'paid' ? 'ซื้อสินค้า/ชำระแล้ว' : 'ค้างชำระ'),
-                        time: d.timestamp ? d.timestamp.toDate() : new Date() 
-                    }); 
+            // ใช้ onSnapshot เฝ้าดูการเปลี่ยนแปลงตลอดเวลาแบบเสี้ยววินาที!
+            unsubscribeTransactions = db.collection("transactions")
+                .where("member_id", "==", currentUserId)
+                .onSnapshot((snapshot) => {
+                    let transactions = [];
+                    snapshot.forEach(t => { 
+                        let d = t.data(); 
+                        transactions.push({ 
+                            date: d.date, status: d.status, amount: d.amount || 0, 
+                            note: d.note || (d.status === 'paid' ? 'ซื้อสินค้า/ชำระแล้ว' : 'ค้างชำระ'),
+                            time: d.timestamp ? d.timestamp.toDate() : new Date() 
+                        }); 
+                    });
+
+                    transactions.sort((a, b) => b.time - a.time);
+
+                    let totalDebt = 0; let unpaidHtml = ''; let paidHtml = '';
+
+                    transactions.forEach(t => {
+                        let timeStr = t.time.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                        if (t.status === 'unpaid') {
+                            totalDebt += t.amount;
+                            unpaidHtml += `
+                                <div class="bill-card unpaid">
+                                    <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:var(--accent-red);">${t.note}</div></div>
+                                    <div class="bill-amount" style="color:var(--accent-red);">฿${t.amount.toFixed(2)}</div>
+                                </div>`;
+                        } else {
+                            paidHtml += `
+                                <div class="bill-card paid">
+                                    <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:#38A169;">${t.note}</div></div>
+                                    <div class="bill-amount" style="color:#38A169;">฿${t.amount.toFixed(2)}</div>
+                                </div>`;
+                        }
+                    });
+
+                    // อัปเดตหน้าจอทันทีที่มีคนเคลียร์บิล หรือ ซื้อของเพิ่ม
+                    document.getElementById('display-total-debt').innerText = `฿${totalDebt.toFixed(2)}`;
+                    document.getElementById('unpaid-list').innerHTML = unpaidHtml || '<div class="empty-state">🎉 ไม่มีรายการค้างชำระ</div>';
+                    document.getElementById('paid-list').innerHTML = paidHtml || '<div class="empty-state">ยังไม่มีประวัติการทำรายการ</div>';
+                }, (error) => {
+                    console.error("Realtime refresh error:", error);
                 });
-
-                transactions.sort((a, b) => b.time - a.time);
-
-                let totalDebt = 0; let unpaidHtml = ''; let paidHtml = '';
-
-                transactions.forEach(t => {
-                    let timeStr = t.time.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-                    if (t.status === 'unpaid') {
-                        totalDebt += t.amount;
-                        unpaidHtml += `
-                            <div class="bill-card unpaid">
-                                <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:var(--accent-red);">${t.note}</div></div>
-                                <div class="bill-amount" style="color:var(--accent-red);">฿${t.amount.toFixed(2)}</div>
-                            </div>`;
-                    } else {
-                        paidHtml += `
-                            <div class="bill-card paid">
-                                <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:#38A169;">${t.note}</div></div>
-                                <div class="bill-amount" style="color:#38A169;">฿${t.amount.toFixed(2)}</div>
-                            </div>`;
-                    }
-                });
-
-                // อัปเดตหน้าจอโดยไม่ให้ผู้ใช้รู้ตัว
-                document.getElementById('display-total-debt').innerText = `฿${totalDebt.toFixed(2)}`;
-                document.getElementById('unpaid-list').innerHTML = unpaidHtml || '<div class="empty-state">🎉 ไม่มีรายการค้างชำระ</div>';
-                document.getElementById('paid-list').innerHTML = paidHtml || '<div class="empty-state">ยังไม่มีประวัติการทำรายการ</div>';
-            } catch (e) {
-                console.error("Silent refresh error:", e);
-            }
         }
     </script>
 </body>
