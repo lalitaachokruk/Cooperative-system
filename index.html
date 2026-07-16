@@ -393,19 +393,18 @@
         }
 
         // ==========================================
-        // 💸 ฟังก์ชัน: จ่ายเงินด้วยตัวเอง (เคลียร์หนี้) สำหรับ E-Service
+        // 💸 ฟังก์ชัน: จ่ายเงินด้วยตัวเอง (เคลียร์หนี้) อัปเดตแก้บั๊กค้าง!
         // ==========================================
         window.selfPayDebt = async function() {
             if(currentTotalDebt <= 0) {
-                return appSwal.fire({icon: 'info', title: 'แจ้งเตือน', text: 'คุณไม่มีหนี้ค้างชำระเลยค่ะ สุดยอดมาก! 🎉', confirmButtonColor: '#38A169'});
+                return Swal.fire({icon: 'info', title: 'แจ้งเตือน', text: 'คุณไม่มีหนี้ค้างชำระเลยค่ะ สุดยอดมาก! 🎉', confirmButtonColor: '#38A169'});
             }
 
-            const { value: payAmount } = await appSwal.fire({
+            const { value: payAmount } = await Swal.fire({
                 title: '💸 จ่ายเงินเคลียร์ยอด',
                 html: `
                     <p style="font-size: 0.95rem; color: #4A5568; margin-bottom: 5px;">ยอดค้างชำระของคุณคือ <b>฿${currentTotalDebt.toFixed(2)}</b></p>
                     <p style="font-size: 0.8rem; color: #DD6B20; margin-bottom: 15px; font-weight: 500;">* สามารถลบตัวเลขแล้วพิมพ์ยอดจ่ายบางส่วนได้ (เช่น จ่ายแค่ 30)</p>
-                    
                     <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุจำนวนเงินที่จ่าย (บาท):</label>
                     <input id="self-pay-amount" type="number" value="${currentTotalDebt}" style="width: 100%; padding: 12px; border: 2px solid #38A169; border-radius: 8px; font-family: 'Kanit'; font-size: 1.2rem; outline: none; box-sizing: border-box; color: #38A169; font-weight: 600;">
                 `,
@@ -423,21 +422,21 @@
             });
 
             if (payAmount) {
-                appSwal.fire({ title: 'กำลังบันทึกการชำระเงิน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                Swal.fire({ title: 'กำลังบันทึกการชำระเงิน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 try {
-                    // ดึงบิลค้างชำระทั้งหมดมาเพื่อเตรียมตัดยอด (ดึงจากเก่าไปใหม่)
+                    // ดึงบิลค้างชำระทั้งหมดมาเพื่อเตรียมตัดยอด
                     const transSnap = await db.collection("transactions")
-                        .where("member_id", "==", currentUserId)
+                        .where("member_id", "==", currentUserId.toString())
                         .where("status", "==", "unpaid")
                         .get();
 
                     let unpaidDocs = [];
                     transSnap.forEach(doc => unpaidDocs.push({ id: doc.id, ref: doc.ref, data: doc.data() }));
                     
-                    // เรียงบิลจากเก่าสุด ไปหา ใหม่สุด เพื่อตัดบิลเก่าทิ้งก่อน
+                    // ป้องกันบั๊กเวลาวันที่ผิดพลาด
                     unpaidDocs.sort((a, b) => {
-                        let tA = a.data.timestamp ? a.data.timestamp.toDate() : new Date(0);
-                        let tB = b.data.timestamp ? b.data.timestamp.toDate() : new Date(0);
+                        let tA = (a.data.timestamp && typeof a.data.timestamp.toDate === 'function') ? a.data.timestamp.toDate() : new Date(0);
+                        let tB = (b.data.timestamp && typeof b.data.timestamp.toDate === 'function') ? b.data.timestamp.toDate() : new Date(0);
                         return tA - tB;
                     });
 
@@ -445,31 +444,29 @@
                     let remainingPay = payAmount;
 
                     for (let i = 0; i < unpaidDocs.length; i++) {
-                        if (remainingPay <= 0) break; // เงินหมดแล้ว หยุดการทำซ้ำ
+                        if (remainingPay <= 0) break; 
 
-                        let doc = unpaidDocs[i];
-                        let billAmt = doc.data.amount;
+                        let docObj = unpaidDocs[i];
+                        let billAmt = docObj.data.amount;
 
                         if (remainingPay >= billAmt) {
-                            // กรณีจ่ายพอสำหรับบิลนี้ -> เคลียร์บิลนี้เป็นจ่ายแล้ว
-                            batch.update(doc.ref, { 
+                            // จ่ายเต็มบิลนี้
+                            batch.update(docObj.ref, { 
                                 status: 'paid', 
-                                note: doc.data.note + ' (จ่ายด้วยตนเอง)',
+                                note: (docObj.data.note || '') + ' (จ่ายด้วยตนเอง)',
                                 pay_date: new Date().toLocaleDateString('en-CA')
                             });
                             remainingPay -= billAmt;
                         } else {
-                            // กรณีจ่ายไม่พอบิลนี้ (จ่ายบางส่วน)
-                            // 1. ลดหนี้ในบิลเดิมลง
-                            batch.update(doc.ref, { amount: billAmt - remainingPay });
+                            // จ่ายบางส่วน
+                            batch.update(docObj.ref, { amount: billAmt - remainingPay });
                             
-                            // 2. แตกบิลใหม่เป็นสถานะจ่ายแล้ว สำหรับส่วนที่จ่ายไป
                             let newRef = db.collection("transactions").doc();
                             batch.set(newRef, {
-                                ...doc.data(),
+                                ...docObj.data, // <--- จุดที่แก้ไขบั๊กตัวปัญหาค่ะ
                                 amount: remainingPay,
                                 status: 'paid',
-                                note: doc.data.note + ' (จ่ายบางส่วนด้วยตนเอง)',
+                                note: (docObj.data.note || '') + ' (จ่ายบางส่วนด้วยตนเอง)',
                                 pay_date: new Date().toLocaleDateString('en-CA'),
                                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
                             });
@@ -477,18 +474,18 @@
                         }
                     }
 
-                    // วิ่งไปบวก "ยอดซื้อสะสม" คืนให้นักเรียน สำหรับนำไปคิดปันผล
-                    const memberRef = db.collection("members").doc(currentUserId);
-                    batch.update(memberRef, { 
+                    // คืนยอดซื้อสะสมให้นักเรียน
+                    const memberRef = db.collection("members").doc(currentUserId.toString());
+                    batch.set(memberRef, { 
                         total_buy_accumulated: firebase.firestore.FieldValue.increment(payAmount) 
-                    });
+                    }, { merge: true });
 
-                    await batch.commit(); // สั่งรันการเปลี่ยนแปลงทั้งหมดลงฐานข้อมูล
+                    await batch.commit(); 
                     
-                    appSwal.fire({ icon: 'success', title: 'ชำระเงินสำเร็จ!', text: `ตัดยอดค้างชำระ ฿${payAmount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false });
+                    Swal.fire({ icon: 'success', title: 'ชำระเงินสำเร็จ!', text: `ตัดยอดค้างชำระ ฿${payAmount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false });
                 } catch (e) {
-                    console.error(e);
-                    appSwal.fire({icon: 'error', title: 'Error', text: 'ไม่สามารถบันทึกข้อมูลได้'});
+                    console.error("Error Detail:", e);
+                    Swal.fire({icon: 'error', title: 'ผิดพลาด', text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้งค่ะ'});
                 }
             }
         }
