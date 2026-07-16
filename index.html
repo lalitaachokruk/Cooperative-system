@@ -393,7 +393,7 @@
         }
 
         // ==========================================
-        // 💸 ฟังก์ชันใหม่: จ่ายเงินด้วยตัวเอง (เคลียร์หนี้)
+        // 💸 ฟังก์ชัน: จ่ายเงินด้วยตัวเอง (เคลียร์หนี้) สำหรับ E-Service
         // ==========================================
         window.selfPayDebt = async function() {
             if(currentTotalDebt <= 0) {
@@ -403,7 +403,9 @@
             const { value: payAmount } = await appSwal.fire({
                 title: '💸 จ่ายเงินเคลียร์ยอด',
                 html: `
-                    <p style="font-size: 0.95rem; color: #4A5568; margin-bottom: 10px;">ยอดค้างชำระของคุณคือ <b>฿${currentTotalDebt.toFixed(2)}</b></p>
+                    <p style="font-size: 0.95rem; color: #4A5568; margin-bottom: 5px;">ยอดค้างชำระของคุณคือ <b>฿${currentTotalDebt.toFixed(2)}</b></p>
+                    <p style="font-size: 0.8rem; color: #DD6B20; margin-bottom: 15px; font-weight: 500;">* สามารถลบตัวเลขแล้วพิมพ์ยอดจ่ายบางส่วนได้ (เช่น จ่ายแค่ 30)</p>
+                    
                     <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุจำนวนเงินที่จ่าย (บาท):</label>
                     <input id="self-pay-amount" type="number" value="${currentTotalDebt}" style="width: 100%; padding: 12px; border: 2px solid #38A169; border-radius: 8px; font-family: 'Kanit'; font-size: 1.2rem; outline: none; box-sizing: border-box; color: #38A169; font-weight: 600;">
                 `,
@@ -474,6 +476,12 @@
                             remainingPay = 0;
                         }
                     }
+
+                    // วิ่งไปบวก "ยอดซื้อสะสม" คืนให้นักเรียน สำหรับนำไปคิดปันผล
+                    const memberRef = db.collection("members").doc(currentUserId);
+                    batch.update(memberRef, { 
+                        total_buy_accumulated: firebase.firestore.FieldValue.increment(payAmount) 
+                    });
 
                     await batch.commit(); // สั่งรันการเปลี่ยนแปลงทั้งหมดลงฐานข้อมูล
                     
