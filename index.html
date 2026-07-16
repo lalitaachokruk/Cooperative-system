@@ -25,14 +25,9 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
         
-        /* 🚀 แก้ปัญหาจอกระโดด: ใช้ height: 100% แทน vh เพื่อไม่ให้มือถือคำนวณจอใหม่ตอนคีย์บอร์ดเด้ง */
-        html, body {
+        body { 
             background-color: #EDF2F7; color: var(--text-dark); 
-            height: 100%; margin: 0; padding: 0;
-        }
-        
-        .main-wrapper {
-            display: flex; flex-direction: column; min-height: 100%;
+            display: flex; flex-direction: column; min-height: 100vh;
         }
         
         /* 📱 Header */
@@ -92,7 +87,6 @@
         /* 👤 ส่วนแสดงผลข้อมูล */
         #result-section { display: none; }
         
-        /* นามบัตร (สีน้ำเงิน) */
         .profile-card { 
             background: linear-gradient(135deg, #1A365D, #2B6CB0); color: white; 
             padding: 20px; border-radius: 12px; margin-bottom: 20px; 
@@ -102,31 +96,39 @@
         .profile-info p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
         .btn-logout { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
-        /* 🔴 ยอดค้างชำระ (แดงพาสเทล ละมุนตา ไม่ตะโกน) */
+        /* 🔴 ยอดค้างชำระ */
         .debt-summary { 
-            background: #FFF5F5; padding: 15px 20px; border-radius: 12px; text-align: center; 
-            border: 2px solid #FEB2B2; box-shadow: 0 2px 8px rgba(229, 62, 62, 0.08); margin-bottom: 20px; 
+            background: #FFF5F5; padding: 20px; border-radius: 12px; text-align: center; 
+            border: 2px solid #FEB2B2; box-shadow: 0 4px 15px rgba(229, 62, 62, 0.1); margin-bottom: 20px; 
         }
-        .debt-summary p { font-size: 0.9rem; font-weight: 500; margin-bottom: 2px; color: #C53030; opacity: 0.9;}
-        .debt-summary h1 { font-size: 2.2rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
+        .debt-summary p { font-size: 1rem; font-weight: 500; margin-bottom: 5px; color: #C53030;}
+        .debt-summary h1 { font-size: 2.5rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
 
-        /* 🛒 กล่องบริการตัวเอง (เส้นทึบสีส้ม พื้นขาว คลีนๆ) */
+        /* 🛒 กล่องบริการตัวเอง (เพิ่มปุ่มจ่ายเงิน) */
         .self-service-box {
-            background: white; padding: 18px 15px; border-radius: 12px; text-align: center; 
-            margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); 
-            border: 2px solid var(--warning-orange); 
+            background: white; padding: 20px 15px; border-radius: 12px; text-align: center; 
+            margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            border: 2px solid #E2E8F0; 
         }
-        .self-service-box p { color: var(--text-dark); font-weight: 500; font-size: 0.95rem; margin-bottom: 12px; }
+        .self-service-box p { color: var(--text-dark); font-weight: 600; font-size: 1rem; margin-bottom: 12px; }
+        
+        .self-service-actions {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        }
         .btn-self-record { 
-            width: 100%; padding: 14px; background: var(--warning-orange); color: white; 
-            border: none; border-radius: 8px; font-size: 1.05rem; cursor: pointer; 
+            padding: 12px; background: var(--warning-orange); color: white; 
+            border: none; border-radius: 8px; font-size: 0.95rem; cursor: pointer; 
             font-weight: 500; box-shadow: 0 4px 10px rgba(221, 107, 32, 0.3); 
-            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-self-pay { 
+            padding: 12px; background: var(--success-green); color: white; 
+            border: none; border-radius: 8px; font-size: 0.95rem; cursor: pointer; 
+            font-weight: 500; box-shadow: 0 4px 10px rgba(56, 161, 105, 0.3); 
         }
 
         .section-title { font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; padding-left: 5px;}
         
-        /* 📜 การ์ดประวัติบิล (พื้นใส) */
+        /* 📜 การ์ดประวัติบิล */
         .bill-card { 
             background: transparent; padding: 15px; border-radius: 10px; 
             border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;
@@ -140,7 +142,7 @@
         
         .empty-state { text-align: center; padding: 30px 10px; color: #A0AEC0; font-size: 0.95rem; }
 
-        /* 📖 ปุ่มคู่มือ (สีน้ำเงิน) */
+        /* 📖 ปุ่มคู่มือ */
         #floating-manual-btn { 
             position: fixed; bottom: 25px; right: 25px; z-index: 999; 
             background-color: var(--primary-blue); color: white; border: none; border-radius: 50%; 
@@ -148,20 +150,18 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; 
         }
 
-        /* 🏢 Footer สีเทาอ่อน */
+        /* 🏢 Footer */
         .footer {
             text-align: center; font-size: 0.8rem; color: #A0AEC0;
             padding: 20px 10px; margin-top: auto; line-height: 1.5; opacity: 0.8;
         }
 
-        /* 🚀 ดักจับ Popup ของ SweetAlert ไม่ให้ยุ่งกับหน้าจอเรา */
         body.swal2-shown { padding-right: 0 !important; overflow-y: auto !important; }
     </style>
 </head>
 <body>
-<div class="main-wrapper">
 
-    <!-- ปุ่มคู่มือ สีน้ำเงินเข้าธีม -->
+    <!-- ปุ่มคู่มือ -->
     <button id="floating-manual-btn" onclick="showMobileManual()">📖</button>
 
     <div class="header">
@@ -187,7 +187,7 @@
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🛒</div>
-                    <div class="feature-text">บริการตัวเอง (Self-Service)<br><span style="color:#718096; font-size:0.8rem; font-weight:400;">บันทึกยอดซื้อสินค้าด้วยตนเอง</span></div>
+                    <div class="feature-text">บริการตัวเอง (Self-Service)<br><span style="color:#718096; font-size:0.8rem; font-weight:400;">บันทึกซื้อสินค้า / จ่ายเคลียร์ยอด</span></div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">📜</div>
@@ -206,18 +206,23 @@
                 <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
             </div>
 
-            <!-- กล่องยอดค้างชำระ (แดงพาสเทล ละมุนตา ไม่ตะโกน) -->
+            <!-- กล่องยอดค้างชำระ -->
             <div class="debt-summary">
                 <p>ยอดค้างชำระปัจจุบัน</p>
                 <h1 id="display-total-debt">฿0.00</h1>
             </div>
 
-            <!-- กล่องบริการตัวเอง (เส้นทึบสีส้ม พื้นขาว คลีนๆ) -->
+            <!-- 🌟 กล่องบริการตัวเอง (เพิ่มปุ่มจ่ายเงิน) -->
             <div class="self-service-box">
-                <p>แอดมินไม่อยู่ หรือ ต้องการหยิบสินค้าเอง?</p>
-                <button class="btn-self-record" onclick="selfRecordDebt()">
-                    🛒 บันทึกยอดซื้อด้วยตัวเอง (แปะโป้ง)
-                </button>
+                <p>ทำรายการด้วยตนเอง (Self-Service)</p>
+                <div class="self-service-actions">
+                    <button class="btn-self-record" onclick="selfRecordDebt()">
+                        🛒 ซื้อของ (แปะโป้ง)
+                    </button>
+                    <button class="btn-self-pay" onclick="selfPayDebt()">
+                        💸 จ่ายเงินเคลียร์ยอด
+                    </button>
+                </div>
             </div>
 
             <h3 class="section-title">🔴 รายการค้างชำระ <span style="font-size:0.8rem; font-weight:400; color:#718096;">(ยังไม่จ่าย)</span></h3>
@@ -228,20 +233,13 @@
         </div>
     </div>
     
-    <!-- ส่วนท้ายเว็บ (Footer สีเทาอ่อน ไม่กวนสายตา) -->
     <div class="footer">
         จัดทำโดย<br>
         ระบบสหกรณ์โรงเรียนบ้านหาดส้มแป้น
     </div>
 
-</div> <!-- ปิด main-wrapper -->
-
     <script>
-        // 🚀 เวทมนตร์สั่งห้าม SweetAlert ยุ่งกับหน้าจอเด็ดขาด (แก้จอกระโดด 100%)
-        const appSwal = Swal.mixin({
-            heightAuto: false,       // ห้ามคำนวณความสูงจอใหม่
-            scrollbarPadding: false  // ห้ามซ่อน Scrollbar จนจอกระตุก
-        });
+        const appSwal = Swal.mixin({ heightAuto: false, scrollbarPadding: false });
 
         // ใช้ฐานข้อมูลเดียวกันกับระบบหลัก
         const firebaseConfig = {
@@ -258,10 +256,11 @@
         let currentUserId = '';
         let currentUserName = '';
         let currentUserClass = '';
+        let currentTotalDebt = 0; // เก็บยอดหนี้ปัจจุบันเพื่อใช้ตอนกดจ่ายเงิน
         let unsubscribeTransactions = null;
 
         // ==========================================
-        // 📖 ระบบคู่มือการใช้งาน (Manual)
+        // 📖 ระบบคู่มือการใช้งาน
         // ==========================================
         window.showMobileManual = function() {
             appSwal.fire({
@@ -277,12 +276,12 @@
                         ระบบจะรวมยอดเงินที่ท่าน <b>"ค้างจ่าย"</b> ทั้งหมดมาแสดงตรงกลางหน้าจอ
                     </div>
                     <div style="background: #FFFAF0; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #DD6B20;">
-                        <b style="color: #DD6B20;">🛒 3. ซื้อสินค้าด้วยตัวเอง</b><br>
-                        หากแอดมินไม่อยู่ ให้กดปุ่ม <b style="color:#DD6B20;">"บันทึกยอดซื้อด้วยตัวเอง"</b> กรอกจำนวนเงิน ระบบจะนำไปลงบัญชีค้างชำระให้ทันที
+                        <b style="color: #DD6B20;">🛒 3. ซื้อของ (แปะโป้ง)</b><br>
+                        เมื่อแอดมินไม่อยู่ ให้หยิบสินค้าและกดปุ่ม "ซื้อของ" เพื่อบันทึกหนี้ด้วยตนเอง
                     </div>
-                    <div style="background: #F0FFF4; padding: 12px; border-radius: 10px; border-left: 4px solid #38A169;">
-                        <b style="color: #38A169;">📜 4. ตรวจสอบประวัติ</b><br>
-                        สามารถเลื่อนดู <b>"รายการค้างชำระ"</b> หรือ <b>"ประวัติที่จ่ายแล้ว"</b> ได้ด้านล่าง (ข้อมูลอัปเดตอัตโนมัติ)
+                    <div style="background: #F0FFF4; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #38A169;">
+                        <b style="color: #38A169;">💸 4. จ่ายเงินเคลียร์ยอด</b><br>
+                        สามารถจ่ายเงินเพื่อเคลียร์ยอดค้างชำระได้ด้วยตนเอง (ระบบจะตัดบิลที่เก่าที่สุดให้ก่อน)
                     </div>
                 </div>
                 `,
@@ -301,12 +300,10 @@
             let inputEl = document.getElementById('member-id');
             let rawId = inputEl.value.trim();
             
-            // 🚀 ปิดคีย์บอร์ดนุ่มนวล
             inputEl.blur(); 
             
             if (!rawId) return appSwal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาระบุรหัสประจำตัวก่อนค่ะ'});
             
-            // 🚀 หน่วงเวลา 0.15 วิ ให้คีย์บอร์ดมือถือยุบตัวเสร็จก่อน ค่อยทำงานต่อ (กันจอกระโดด)
             setTimeout(async () => {
                 let id = toArabic(rawId);
                 appSwal.fire({ title: 'กำลังดึงข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -333,10 +330,8 @@
                     document.getElementById('display-name').innerText = currentUserName;
                     document.getElementById('display-id').innerText = `รหัส: ${currentUserId} | ชั้น: ${currentUserClass}`;
 
-                    // เริ่ม Real-time ทันที
                     startRealtimeListener();
 
-                    // สลับหน้าจอเบาๆ ไม่มีการ Scroll กระชากแล้ว
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('result-section').style.display = 'block';
                     
@@ -346,28 +341,28 @@
                     console.error(e);
                     appSwal.fire({icon: 'error', title: 'ข้อผิดพลาด', text: 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้'});
                 }
-            }, 150); // รอ 150 มิลลิวินาที
+            }, 150); 
         }
 
         // ==========================================
-        // ฟังก์ชัน: ให้ผู้ใช้บันทึกยอดหนี้ด้วยตัวเอง
+        // 🛒 ฟังก์ชัน: ซื้อของด้วยตัวเอง (เพิ่มหนี้)
         // ==========================================
         window.selfRecordDebt = async function() {
             const { value: amount } = await appSwal.fire({
                 title: '🛒 บันทึกซื้อสินค้า (แปะโป้ง)',
                 html: `
-                    <p style="font-size: 0.9rem; color: #4A5568; margin-bottom: 10px;">ระบบจะบันทึกยอดนี้เป็น <b>"รายการค้างชำระ"</b> ในบัญชีของคุณทันที</p>
-                    <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุยอดเงิน (บาท):</label>
+                    <p style="font-size: 0.9rem; color: #4A5568; margin-bottom: 10px;">ระบบจะบันทึกยอดนี้เป็น <b>"รายการค้างชำระ"</b> ทันที</p>
+                    <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุราคาสินค้า (บาท):</label>
                     <input id="self-debt-amount" type="number" placeholder="เช่น 20, 50" style="width: 100%; padding: 12px; border: 2px solid #DD6B20; border-radius: 8px; font-family: 'Kanit'; font-size: 1.2rem; outline: none; box-sizing: border-box;">
                 `,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#DD6B20',
-                confirmButtonText: 'บันทึกยอดเงิน',
+                confirmButtonText: 'บันทึกซื้อสินค้า',
                 cancelButtonText: 'ยกเลิก',
                 preConfirm: () => {
                     const val = parseFloat(document.getElementById('self-debt-amount').value);
-                    if (isNaN(val) || val <= 0) { Swal.showValidationMessage('กรุณาระบุยอดเงินให้ถูกต้องค่ะ'); return false; }
+                    if (isNaN(val) || val <= 0) { Swal.showValidationMessage('กรุณาระบุราคาให้ถูกต้องค่ะ'); return false; }
                     return val;
                 }
             });
@@ -384,14 +379,105 @@
                         amount: amount,
                         date: todayDate,
                         status: 'unpaid',
-                        note: 'ซื้อสินค้า (บันทึกด้วยตัวเอง)',
+                        note: 'ซื้อสินค้า (บริการตนเอง)',
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        recorded_by: 'ผู้ใช้บันทึกเองทางมือถือ'
+                        recorded_by: 'ผู้ใช้บันทึกเอง'
                     });
                     
                     appSwal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เพิ่มยอดค้างชำระ ฿${amount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false });
+                } catch (e) {
+                    console.error(e);
+                    appSwal.fire({icon: 'error', title: 'Error', text: 'ไม่สามารถบันทึกข้อมูลได้'});
+                }
+            }
+        }
+
+        // ==========================================
+        // 💸 ฟังก์ชันใหม่: จ่ายเงินด้วยตัวเอง (เคลียร์หนี้)
+        // ==========================================
+        window.selfPayDebt = async function() {
+            if(currentTotalDebt <= 0) {
+                return appSwal.fire({icon: 'info', title: 'แจ้งเตือน', text: 'คุณไม่มีหนี้ค้างชำระเลยค่ะ สุดยอดมาก! 🎉', confirmButtonColor: '#38A169'});
+            }
+
+            const { value: payAmount } = await appSwal.fire({
+                title: '💸 จ่ายเงินเคลียร์ยอด',
+                html: `
+                    <p style="font-size: 0.95rem; color: #4A5568; margin-bottom: 10px;">ยอดค้างชำระของคุณคือ <b>฿${currentTotalDebt.toFixed(2)}</b></p>
+                    <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุจำนวนเงินที่จ่าย (บาท):</label>
+                    <input id="self-pay-amount" type="number" value="${currentTotalDebt}" style="width: 100%; padding: 12px; border: 2px solid #38A169; border-radius: 8px; font-family: 'Kanit'; font-size: 1.2rem; outline: none; box-sizing: border-box; color: #38A169; font-weight: 600;">
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#38A169',
+                confirmButtonText: 'ยืนยันการจ่ายเงิน',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: () => {
+                    const val = parseFloat(document.getElementById('self-pay-amount').value);
+                    if (isNaN(val) || val <= 0) { Swal.showValidationMessage('กรุณาระบุยอดเงินให้ถูกต้องค่ะ'); return false; }
+                    if (val > currentTotalDebt) { Swal.showValidationMessage('คุณระบุยอดจ่ายเกินยอดค้างชำระค่ะ'); return false; }
+                    return val;
+                }
+            });
+
+            if (payAmount) {
+                appSwal.fire({ title: 'กำลังบันทึกการชำระเงิน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    // ดึงบิลค้างชำระทั้งหมดมาเพื่อเตรียมตัดยอด (ดึงจากเก่าไปใหม่)
+                    const transSnap = await db.collection("transactions")
+                        .where("member_id", "==", currentUserId)
+                        .where("status", "==", "unpaid")
+                        .get();
+
+                    let unpaidDocs = [];
+                    transSnap.forEach(doc => unpaidDocs.push({ id: doc.id, ref: doc.ref, data: doc.data() }));
                     
-                    // ระบบ Real-time จะจัดการอัปเดตเลขหน้าจอเอง ไม่ต้องรีโหลดใหม่ ไม่กระโดด!
+                    // เรียงบิลจากเก่าสุด ไปหา ใหม่สุด เพื่อตัดบิลเก่าทิ้งก่อน
+                    unpaidDocs.sort((a, b) => {
+                        let tA = a.data.timestamp ? a.data.timestamp.toDate() : new Date(0);
+                        let tB = b.data.timestamp ? b.data.timestamp.toDate() : new Date(0);
+                        return tA - tB;
+                    });
+
+                    let batch = db.batch();
+                    let remainingPay = payAmount;
+
+                    for (let i = 0; i < unpaidDocs.length; i++) {
+                        if (remainingPay <= 0) break; // เงินหมดแล้ว หยุดการทำซ้ำ
+
+                        let doc = unpaidDocs[i];
+                        let billAmt = doc.data.amount;
+
+                        if (remainingPay >= billAmt) {
+                            // กรณีจ่ายพอสำหรับบิลนี้ -> เคลียร์บิลนี้เป็นจ่ายแล้ว
+                            batch.update(doc.ref, { 
+                                status: 'paid', 
+                                note: doc.data.note + ' (จ่ายด้วยตนเอง)',
+                                pay_date: new Date().toLocaleDateString('en-CA')
+                            });
+                            remainingPay -= billAmt;
+                        } else {
+                            // กรณีจ่ายไม่พอบิลนี้ (จ่ายบางส่วน)
+                            // 1. ลดหนี้ในบิลเดิมลง
+                            batch.update(doc.ref, { amount: billAmt - remainingPay });
+                            
+                            // 2. แตกบิลใหม่เป็นสถานะจ่ายแล้ว สำหรับส่วนที่จ่ายไป
+                            let newRef = db.collection("transactions").doc();
+                            batch.set(newRef, {
+                                ...doc.data(),
+                                amount: remainingPay,
+                                status: 'paid',
+                                note: doc.data.note + ' (จ่ายบางส่วนด้วยตนเอง)',
+                                pay_date: new Date().toLocaleDateString('en-CA'),
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            remainingPay = 0;
+                        }
+                    }
+
+                    await batch.commit(); // สั่งรันการเปลี่ยนแปลงทั้งหมดลงฐานข้อมูล
+                    
+                    appSwal.fire({ icon: 'success', title: 'ชำระเงินสำเร็จ!', text: `ตัดยอดค้างชำระ ฿${payAmount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false });
                 } catch (e) {
                     console.error(e);
                     appSwal.fire({icon: 'error', title: 'Error', text: 'ไม่สามารถบันทึกข้อมูลได้'});
@@ -411,7 +497,7 @@
         }
 
         // ==========================================
-        // 🚀 ระบบดึงข้อมูลแบบ Real-time ของแท้!
+        // 🚀 ระบบดึงข้อมูลแบบ Real-time 
         // ==========================================
         function startRealtimeListener() {
             if (unsubscribeTransactions) {
@@ -453,6 +539,7 @@
                         }
                     });
 
+                    currentTotalDebt = totalDebt; // เก็บยอดลงตัวแปรกลางให้ปุ่มจ่ายเงินดึงไปใช้
                     document.getElementById('display-total-debt').innerText = `฿${totalDebt.toFixed(2)}`;
                     document.getElementById('unpaid-list').innerHTML = unpaidHtml || '<div class="empty-state">🎉 ไม่มีรายการค้างชำระ</div>';
                     document.getElementById('paid-list').innerHTML = paidHtml || '<div class="empty-state">ยังไม่มีประวัติการทำรายการ</div>';
