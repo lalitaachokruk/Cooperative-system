@@ -2,237 +2,296 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>ระบบบริการสมาชิก (E-Service) - สหกรณ์โรงเรียนบ้านหาดส้มแป้น</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        :root { 
-            --primary-blue: #1A365D; 
-            --secondary-blue: #2B6CB0;
-            --brand-red: #7f0101; 
-            --accent-red: #E53E3E; 
-            --bg-gray: #F7FAFC;
-            --text-dark: #2D3748; 
-            --text-muted: #718096;
-            --success-green: #38A169;
-            --warning-orange: #DD6B20;
+        :root {
+            --navy: #14213d;
+            --navy-2: #1f3a63;
+            --brand-red: #7f0101;
+            --red-soft: #a8342f;
+            --bg: #f3f5f9;
+            --card: #ffffff;
+            --ink: #1c2230;
+            --muted: #7c8698;
+            --line: #e7ebf2;
+            --green: #1f9d63;
+            --green-soft: #e6f7ee;
+            --amber: #d97b23;
+            --amber-soft: #fdf1e3;
+            --red: #d3453b;
+            --red-soft-bg: #fdecec;
+            --radius: 16px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
-        
-        body { 
-            background-color: #EDF2F7; color: var(--text-dark); 
+        html { -webkit-text-size-adjust: 100%; }
+
+        body {
+            background: var(--bg); color: var(--ink);
             display: flex; flex-direction: column; min-height: 100vh;
+            overflow-anchor: none;
         }
-        
-        /* 📱 Header */
-        .header { 
-            background: white; padding: 15px 20px; text-align: center; 
-            border-bottom: 3px solid var(--brand-red); box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+
+        /* Header */
+        .header {
+            background: var(--card); padding: 14px 18px;
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 1px solid var(--line);
             position: sticky; top: 0; z-index: 100;
         }
-        
-        @keyframes pulseLogo {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .header img { height: 36px; width: 36px; object-fit: contain; border-radius: 8px; }
+        .header .htext { text-align: left; line-height: 1.25; }
+        .header h1 { font-size: 0.95rem; color: var(--navy); font-weight: 600; }
+        .header p { font-size: 0.72rem; color: var(--muted); font-weight: 400; }
+
+        .container { padding: 18px 16px 90px; max-width: 560px; margin: 0 auto; flex: 1; width: 100%; }
+
+        /* Icon chip helper */
+        .ic { display: inline-flex; }
+        .ic svg { width: 1em; height: 1em; stroke-width: 2.1; }
+
+        /* Login / search */
+        .search-box {
+            background: var(--card); padding: 26px 22px; border-radius: var(--radius);
+            box-shadow: 0 8px 24px rgba(20,33,61,0.06); text-align: center; margin-bottom: 18px;
+            border: 1px solid var(--line);
         }
-        .header img { height: 45px; margin-bottom: 5px; animation: pulseLogo 2.5s infinite ease-in-out; }
-        .header h1 { font-size: 1.15rem; color: var(--brand-red); margin: 0; font-weight: 600;}
-        
-        .container { padding: 20px 15px; max-width: 600px; margin: 0 auto; flex: 1; width: 100%; }
-        
-        /* 🔍 กล่องค้นหา (Login) */
-        .search-box { 
-            background: white; padding: 25px 20px; border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; margin-top: 10px;
+        .search-box label { display: block; font-size: 1rem; color: var(--navy); font-weight: 600; margin-bottom: 14px; }
+        .search-input-wrap { position: relative; margin-bottom: 14px; }
+        .search-input-wrap .ic {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--muted); font-size: 1.15rem; pointer-events: none;
         }
-        .search-box label { display: block; font-size: 1.05rem; color: var(--primary-blue); font-weight: 500; margin-bottom: 10px; }
-        .search-input { 
-            width: 100%; padding: 15px; font-size: 1.2rem; border: 2px solid #E2E8F0; 
-            border-radius: 8px; text-align: center; outline: none; transition: 0.3s; margin-bottom: 15px; background: var(--bg-gray); 
+        .search-input {
+            width: 100%; padding: 14px 14px 14px 42px; font-size: 1.1rem; border: 1.5px solid var(--line);
+            border-radius: 12px; text-align: left; outline: none; transition: 0.2s; background: var(--bg);
         }
-        .search-input:focus { border-color: var(--secondary-blue); background: white; }
-        .btn-search { 
-            width: 100%; padding: 15px; background: var(--primary-blue); color: white; 
-            border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; font-weight: 500; 
-            box-shadow: 0 4px 10px rgba(26, 54, 93, 0.2); display: flex; justify-content: center; align-items: center; gap: 8px;
+        .search-input:focus { border-color: var(--navy-2); background: var(--card); }
+        .btn-search {
+            width: 100%; padding: 14px; background: var(--navy); color: white;
+            border: none; border-radius: 12px; font-size: 1.02rem; cursor: pointer; font-weight: 500;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            transition: transform 0.15s, background 0.2s;
         }
-        
-        /* ✨ กล่องแนะนำบริการ */
+        .btn-search:active { transform: scale(0.98); background: var(--navy-2); }
+
+        /* Features */
         .features-list {
-            background: white; padding: 20px; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
+            background: var(--card); padding: 18px; border-radius: var(--radius);
+            border: 1px solid var(--line);
         }
-        .features-list h3 { 
-            color: var(--primary-blue); font-size: 1.05rem; margin-bottom: 15px; 
-            text-align: center; font-weight: 600;
+        .features-list h3 {
+            color: var(--navy); font-size: 0.95rem; margin-bottom: 14px;
+            font-weight: 600; display: flex; align-items: center; gap: 8px;
         }
         .feature-item {
-            display: flex; align-items: center; gap: 15px; margin-bottom: 12px;
-            padding: 10px 12px; border-radius: 10px;
+            display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
+            padding: 10px 8px; border-radius: 10px;
         }
         .feature-icon {
-            background: #EBF8FF; width: 42px; height: 42px; border-radius: 10px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 1.2rem; color: var(--secondary-blue); flex-shrink: 0;
+            background: #eef3fb; width: 40px; height: 40px; border-radius: 11px;
+            display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+            color: var(--navy-2); font-size: 1.15rem;
         }
-        .feature-text { font-size: 0.95rem; color: var(--text-dark); font-weight: 500; text-align: left; line-height: 1.3;}
+        .feature-text { font-size: 0.9rem; color: var(--ink); font-weight: 500; text-align: left; line-height: 1.3; }
+        .feature-text span { color: var(--muted); font-size: 0.78rem; font-weight: 400; }
 
-        /* 👤 ส่วนแสดงผลข้อมูล */
+        /* Result section */
         #result-section { display: none; }
-        
-        .profile-card { 
-            background: linear-gradient(135deg, #1A365D, #2B6CB0); color: white; 
-            padding: 20px; border-radius: 12px; margin-bottom: 20px; 
-            box-shadow: 0 4px 15px rgba(43, 108, 176, 0.3); display: flex; align-items: center; justify-content: space-between;
-        }
-        .profile-info h2 { font-size: 1.2rem; margin: 0 0 5px 0; }
-        .profile-info p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
-        .btn-logout { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
-        /* 🔴 ยอดค้างชำระ */
-        .debt-summary { 
-            background: #FFF5F5; padding: 20px; border-radius: 12px; text-align: center; 
-            border: 2px solid #FEB2B2; box-shadow: 0 4px 15px rgba(229, 62, 62, 0.1); margin-bottom: 20px; 
+        .profile-card {
+            background: linear-gradient(135deg, var(--navy), var(--navy-2)); color: white;
+            padding: 20px; border-radius: var(--radius); margin-bottom: 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 10px 24px rgba(20,33,61,0.22);
         }
-        .debt-summary p { font-size: 1rem; font-weight: 500; margin-bottom: 5px; color: #C53030;}
-        .debt-summary h1 { font-size: 2.5rem; margin: 0; line-height: 1; font-weight: 600; color: #E53E3E;}
-
-        /* 🛒 กล่องบริการตัวเอง (เพิ่มปุ่มจ่ายเงิน) */
-        .self-service-box {
-            background: white; padding: 20px 15px; border-radius: 12px; text-align: center; 
-            margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-            border: 2px solid #E2E8F0; 
-        }
-        .self-service-box p { color: var(--text-dark); font-weight: 600; font-size: 1rem; margin-bottom: 12px; }
-        
-        .self-service-actions {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-        }
-        .btn-self-record { 
-            padding: 12px; background: var(--warning-orange); color: white; 
-            border: none; border-radius: 8px; font-size: 0.95rem; cursor: pointer; 
-            font-weight: 500; box-shadow: 0 4px 10px rgba(221, 107, 32, 0.3); 
-        }
-        .btn-self-pay { 
-            padding: 12px; background: var(--success-green); color: white; 
-            border: none; border-radius: 8px; font-size: 0.95rem; cursor: pointer; 
-            font-weight: 500; box-shadow: 0 4px 10px rgba(56, 161, 105, 0.3); 
+        .profile-info h2 { font-size: 1.1rem; margin-bottom: 3px; font-weight: 600; }
+        .profile-info p { font-size: 0.82rem; opacity: 0.8; }
+        .btn-logout {
+            background: rgba(255,255,255,0.14); color: white; border: none; padding: 8px 10px;
+            border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.8rem;
         }
 
-        .section-title { font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; padding-left: 5px;}
-        
-        /* 📜 การ์ดประวัติบิล */
-        .bill-card { 
-            background: transparent; padding: 15px; border-radius: 10px; 
-            border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;
-            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; 
+        /* Debt hero */
+        .debt-summary {
+            position: relative; overflow: hidden;
+            background: var(--card); padding: 26px 20px; border-radius: var(--radius); text-align: center;
+            border: 1px solid var(--line); margin-bottom: 14px;
         }
-        .bill-card.unpaid { border-left: 4px solid var(--accent-red); }
-        .bill-card.paid { border-left: 4px solid var(--success-green); }
-        .bill-date { font-size: 0.85rem; color: #718096; margin-bottom: 4px; }
-        .bill-status { font-size: 0.9rem; font-weight: 500; color: var(--text-dark);}
-        .bill-amount { font-size: 1.2rem; font-weight: 600; }
-        
-        .empty-state { text-align: center; padding: 30px 10px; color: #A0AEC0; font-size: 0.95rem; }
+        .debt-summary::before {
+            content: ""; position: absolute; top: -60px; right: -60px; width: 160px; height: 160px;
+            border-radius: 50%; background: radial-gradient(circle, rgba(211,69,59,0.10), transparent 70%);
+        }
+        .debt-summary .label {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            font-size: 0.85rem; font-weight: 500; color: var(--muted); margin-bottom: 6px;
+        }
+        .debt-summary h1 { position: relative; font-size: 2.4rem; font-weight: 700; color: var(--red); line-height: 1.1; }
+        .debt-summary h1.zero { color: var(--green); }
+        .debt-summary .sub { position: relative; font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
 
-        /* 📖 ปุ่มคู่มือ */
-        #floating-manual-btn { 
-            position: fixed; bottom: 25px; right: 25px; z-index: 999; 
-            background-color: var(--primary-blue); color: white; border: none; border-radius: 50%; 
-            width: 55px; height: 55px; font-size: 1.4rem; cursor: pointer; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; 
+        /* Self-service */
+        .self-service-box { margin-bottom: 20px; }
+        .self-service-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .action-btn {
+            padding: 16px 10px; border: none; border-radius: 14px; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            font-size: 0.88rem; font-weight: 500; transition: transform 0.15s;
+        }
+        .action-btn:active { transform: scale(0.97); }
+        .action-btn .ic { font-size: 1.4rem; }
+        .btn-self-record { background: var(--amber-soft); color: var(--amber); border: 1px solid #f5dcb8; }
+        .btn-self-pay { background: var(--green-soft); color: var(--green); border: 1px solid #bfe8d3; }
+
+        /* Tabs */
+        .tabs { display: flex; background: #e9ecf3; border-radius: 12px; padding: 4px; margin-bottom: 12px; gap: 4px; }
+        .tab-btn {
+            flex: 1; border: none; background: transparent; padding: 10px 8px; border-radius: 9px;
+            font-size: 0.88rem; font-weight: 500; color: var(--muted); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.15s;
+        }
+        .tab-btn.active { background: var(--card); color: var(--navy); box-shadow: 0 2px 6px rgba(20,33,61,0.08); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Bill cards */
+        .bill-card {
+            background: var(--card); padding: 14px 16px; border-radius: 12px;
+            border: 1px solid var(--line); margin-bottom: 9px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .bill-card.unpaid { border-left: 4px solid var(--red); }
+        .bill-card.paid { border-left: 4px solid var(--green); }
+        .bill-date { font-size: 0.78rem; color: var(--muted); margin-bottom: 3px; }
+        .bill-status { font-size: 0.86rem; font-weight: 500; }
+        .bill-amount { font-size: 1.1rem; font-weight: 600; }
+
+        .empty-state { text-align: center; padding: 32px 10px; color: var(--muted); font-size: 0.9rem; }
+        .empty-state .ic { font-size: 1.8rem; display: block; margin: 0 auto 8px; color: #c3cad8; }
+
+        /* Floating manual button */
+        #floating-manual-btn {
+            position: fixed; bottom: 22px; right: 20px; z-index: 999;
+            background: var(--navy); color: white; border: none; border-radius: 50%;
+            width: 52px; height: 52px; cursor: pointer; box-shadow: 0 8px 20px rgba(20,33,61,0.3);
+            display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
         }
 
-        /* 🏢 Footer */
-        .footer {
-            text-align: center; font-size: 0.8rem; color: #A0AEC0;
-            padding: 20px 10px; margin-top: auto; line-height: 1.5; opacity: 0.8;
+        .footer { text-align: center; font-size: 0.76rem; color: #a8b0bd; padding: 18px 10px; margin-top: auto; line-height: 1.5; }
+
+        /* Toasts */
+        #toast-container {
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+            z-index: 2000; display: flex; flex-direction: column; gap: 8px; align-items: center;
+            width: 100%; max-width: 380px; padding: 0 16px; pointer-events: none;
         }
+        .toast {
+            display: flex; align-items: center; gap: 10px; background: var(--ink); color: white;
+            padding: 12px 16px; border-radius: 12px; font-size: 0.88rem; font-weight: 500;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.22); width: 100%;
+            opacity: 0; transform: translateY(10px); transition: 0.25s ease;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { background: var(--green); }
+        .toast.error { background: var(--red-soft); }
+        .toast .ic { flex-shrink: 0; font-size: 1.1rem; }
 
         body.swal2-shown { padding-right: 0 !important; overflow-y: auto !important; }
     </style>
 </head>
 <body>
 
-    <!-- ปุ่มคู่มือ -->
-    <button id="floating-manual-btn" onclick="showMobileManual()">📖</button>
+    <button id="floating-manual-btn" onclick="showMobileManual()"><i data-lucide="book-open"></i></button>
+    <div id="toast-container"></div>
 
     <div class="header">
         <img src="https://www.banhadsompan.ac.th/_files_school/86101511/data/86101511_0_20240629-000624.png" alt="โลโก้">
-        <h1>ระบบบริการสมาชิก (E-Service)</h1>
+        <div class="htext">
+            <h1>ระบบบริการสมาชิก (E-Service)</h1>
+            <p>สหกรณ์โรงเรียนบ้านหาดส้มแป้น</p>
+        </div>
     </div>
 
     <div class="container">
-        <!-- หน้าเข้าสู่ระบบ -->
         <div id="login-section">
             <div class="search-box">
                 <label>ตรวจสอบยอด และ บันทึกการซื้อ</label>
-                <input type="number" id="member-id" class="search-input" placeholder="พิมพ์รหัสประจำตัว (เช่น 0004)" autocomplete="off">
-                <button class="btn-search" onclick="checkData()">🔍 เข้าสู่ระบบ</button>
+                <div class="search-input-wrap">
+                    <span class="ic"><i data-lucide="user"></i></span>
+                    <input type="number" id="member-id" class="search-input" placeholder="รหัสประจำตัว (เช่น 0004)" autocomplete="off">
+                </div>
+                <button class="btn-search" onclick="checkData()"><i data-lucide="log-in" class="ic"></i> เข้าสู่ระบบ</button>
             </div>
-            
-            <!-- กล่องแนะนำบริการ -->
+
             <div class="features-list">
-                <h3>📱 บริการระบบสมาชิก (E-Service)</h3>
+                <h3><i data-lucide="smartphone" class="ic"></i> บริการระบบสมาชิก (E-Service)</h3>
                 <div class="feature-item">
-                    <div class="feature-icon">💰</div>
-                    <div class="feature-text">เช็คยอดค้างชำระ<br><span style="color:#718096; font-size:0.8rem; font-weight:400;">ตรวจสอบยอดหนี้แบบเรียลไทม์</span></div>
+                    <div class="feature-icon"><i data-lucide="wallet"></i></div>
+                    <div class="feature-text">เช็คยอดค้างชำระ<br><span>ตรวจสอบยอดหนี้แบบเรียลไทม์</span></div>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon">🛒</div>
-                    <div class="feature-text">บริการตัวเอง (Self-Service)<br><span style="color:#718096; font-size:0.8rem; font-weight:400;">บันทึกซื้อสินค้า / จ่ายเคลียร์ยอด</span></div>
+                    <div class="feature-icon"><i data-lucide="shopping-cart"></i></div>
+                    <div class="feature-text">บริการตัวเอง (Self-Service)<br><span>บันทึกซื้อสินค้า / จ่ายเคลียร์ยอด</span></div>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon">📜</div>
-                    <div class="feature-text">ตรวจสอบประวัติ<br><span style="color:#718096; font-size:0.8rem; font-weight:400;">ดูประวัติการซื้อและชำระเงินย้อนหลัง</span></div>
+                    <div class="feature-icon"><i data-lucide="history"></i></div>
+                    <div class="feature-text">ตรวจสอบประวัติ<br><span>ดูประวัติการซื้อและชำระเงินย้อนหลัง</span></div>
                 </div>
             </div>
         </div>
 
-        <!-- หน้าแสดงข้อมูลส่วนตัว -->
         <div id="result-section">
             <div class="profile-card">
                 <div class="profile-info">
                     <h2 id="display-name">ชื่อ - นามสกุล</h2>
                     <p id="display-id">รหัส: - | ชั้น: -</p>
                 </div>
-                <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+                <button class="btn-logout" onclick="logout()"><i data-lucide="log-out" class="ic"></i> ออก</button>
             </div>
 
-            <!-- กล่องยอดค้างชำระ -->
             <div class="debt-summary">
-                <p>ยอดค้างชำระปัจจุบัน</p>
+                <div class="label"><i data-lucide="wallet" class="ic"></i> ยอดค้างชำระปัจจุบัน</div>
                 <h1 id="display-total-debt">฿0.00</h1>
+                <div class="sub" id="debt-sub">กำลังโหลดข้อมูล...</div>
             </div>
 
-            <!-- 🌟 กล่องบริการตัวเอง (เพิ่มปุ่มจ่ายเงิน) -->
             <div class="self-service-box">
-                <p>ทำรายการด้วยตนเอง (Self-Service)</p>
                 <div class="self-service-actions">
-                    <button class="btn-self-record" onclick="selfRecordDebt()">
-                        🛒 ซื้อของ (แปะโป้ง)
+                    <button class="action-btn btn-self-record" onclick="selfRecordDebt()">
+                        <span class="ic"><i data-lucide="shopping-cart"></i></span> ซื้อของ (แปะโป้ง)
                     </button>
-                    <button class="btn-self-pay" onclick="selfPayDebt()">
-                        💸 จ่ายเงินเคลียร์ยอด
+                    <button class="action-btn btn-self-pay" onclick="selfPayDebt()">
+                        <span class="ic"><i data-lucide="banknote"></i></span> จ่ายเงินเคลียร์ยอด
                     </button>
                 </div>
             </div>
 
-            <h3 class="section-title">🔴 รายการค้างชำระ <span style="font-size:0.8rem; font-weight:400; color:#718096;">(ยังไม่จ่าย)</span></h3>
-            <div id="unpaid-list"></div>
+            <div class="tabs">
+                <button class="tab-btn active" id="tab-unpaid" onclick="switchTab('unpaid')">
+                    <i data-lucide="alert-circle" class="ic"></i> ค้างชำระ
+                </button>
+                <button class="tab-btn" id="tab-paid" onclick="switchTab('paid')">
+                    <i data-lucide="check-circle-2" class="ic"></i> ประวัติ
+                </button>
+            </div>
 
-            <h3 class="section-title" style="margin-top: 25px;">🟢 ประวัติการซื้อ <span style="font-size:0.8rem; font-weight:400; color:#718096;">(ชำระแล้ว)</span></h3>
-            <div id="paid-list"></div>
+            <div class="tab-panel active" id="panel-unpaid">
+                <div id="unpaid-list"></div>
+            </div>
+            <div class="tab-panel" id="panel-paid">
+                <div id="paid-list"></div>
+            </div>
         </div>
     </div>
-    
+
     <div class="footer">
         จัดทำโดย<br>
         ระบบสหกรณ์โรงเรียนบ้านหาดส้มแป้น
@@ -241,7 +300,6 @@
     <script>
         const appSwal = Swal.mixin({ heightAuto: false, scrollbarPadding: false });
 
-        // ใช้ฐานข้อมูลเดียวกันกับระบบหลัก
         const firebaseConfig = {
             apiKey: "AIzaSyAYaXrrNOCRbC7uDVc4tXHMDQcSiwswxoo",
             authDomain: "school-cooperative-system.firebaseapp.com",
@@ -250,60 +308,97 @@
             messagingSenderId: "383328934393",
             appId: "1:383328934393:web:0a326b1e0098b7d6cf4528"
         };
-        firebase.initializeApp(firebaseConfig); 
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         let currentUserId = '';
         let currentUserName = '';
         let currentUserClass = '';
-        let currentTotalDebt = 0; // เก็บยอดหนี้ปัจจุบันเพื่อใช้ตอนกดจ่ายเงิน
+        let currentTotalDebt = 0;
         let unsubscribeTransactions = null;
 
+        function refreshIcons() { if (window.lucide) lucide.createIcons(); }
+        refreshIcons();
+
         // ==========================================
-        // 📖 ระบบคู่มือการใช้งาน
+        // 🔔 Toast notifications (แทน popup สำเร็จเดิม)
+        // ==========================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const iconName = type === 'success' ? 'check-circle-2' : 'x-circle';
+            toast.innerHTML = `<span class="ic"><i data-lucide="${iconName}"></i></span><span>${message}</span>`;
+            container.appendChild(toast);
+            refreshIcons();
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 250);
+            }, 2600);
+        }
+
+        // ==========================================
+        // 📌 ป้องกันหน้าจอเด้งกลับด้านบน (scroll lock)
+        // ==========================================
+        let savedScrollY = 0;
+        function lockScroll() { savedScrollY = window.scrollY; }
+        function restoreScroll() {
+            requestAnimationFrame(() => window.scrollTo(0, savedScrollY));
+        }
+
+        // ==========================================
+        // 📖 คู่มือการใช้งาน
         // ==========================================
         window.showMobileManual = function() {
+            lockScroll();
             appSwal.fire({
-                title: '📖 คู่มือการใช้งาน',
+                title: 'คู่มือการใช้งาน',
                 html: `
-                <div style="text-align: left; font-size: 0.95rem; line-height: 1.6; color: #2D3748; padding-top: 10px;">
-                    <div style="background: #F8FAFC; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #1A365D;">
-                        <b style="color: #1A365D;">🔍 1. การเข้าสู่ระบบ</b><br>
+                <div style="text-align: left; font-size: 0.95rem; line-height: 1.6; color: #1c2230; padding-top: 10px;">
+                    <div style="background: #eef3fb; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #14213d;">
+                        <b style="color: #14213d;">1. การเข้าสู่ระบบ</b><br>
                         พิมพ์รหัสประจำตัวของท่าน (เช่น 0004 หรือ 4) ลงในช่องค้นหา แล้วกดเข้าสู่ระบบ
                     </div>
-                    <div style="background: #FFF5F5; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #E53E3E;">
-                        <b style="color: #E53E3E;">💰 2. เช็คยอดค้างชำระ</b><br>
-                        ระบบจะรวมยอดเงินที่ท่าน <b>"ค้างจ่าย"</b> ทั้งหมดมาแสดงตรงกลางหน้าจอ
+                    <div style="background: #fdecec; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #d3453b;">
+                        <b style="color: #d3453b;">2. เช็คยอดค้างชำระ</b><br>
+                        ระบบจะรวมยอดเงินที่ท่าน "ค้างจ่าย" ทั้งหมดมาแสดงตรงกลางหน้าจอ
                     </div>
-                    <div style="background: #FFFAF0; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #DD6B20;">
-                        <b style="color: #DD6B20;">🛒 3. ซื้อของ (แปะโป้ง)</b><br>
+                    <div style="background: #fdf1e3; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #d97b23;">
+                        <b style="color: #d97b23;">3. ซื้อของ (แปะโป้ง)</b><br>
                         เมื่อแอดมินไม่อยู่ ให้หยิบสินค้าและกดปุ่ม "ซื้อของ" เพื่อบันทึกหนี้ด้วยตนเอง
                     </div>
-                    <div style="background: #F0FFF4; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #38A169;">
-                        <b style="color: #38A169;">💸 4. จ่ายเงินเคลียร์ยอด</b><br>
+                    <div style="background: #e6f7ee; padding: 12px; border-radius: 10px; border-left: 4px solid #1f9d63;">
+                        <b style="color: #1f9d63;">4. จ่ายเงินเคลียร์ยอด</b><br>
                         สามารถจ่ายเงินเพื่อเคลียร์ยอดค้างชำระได้ด้วยตนเอง (ระบบจะตัดบิลที่เก่าที่สุดให้ก่อน)
                     </div>
                 </div>
                 `,
                 confirmButtonText: 'เข้าใจแล้ว',
-                confirmButtonColor: '#1A365D'
+                confirmButtonColor: '#14213d',
+                didClose: restoreScroll
             });
         };
 
         document.getElementById('member-id').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') checkData();
+            if (e.key === 'Enter') { e.preventDefault(); this.blur(); checkData(); }
         });
 
         function toArabic(text) { const t=['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙']; return text.replace(/[๐-๙]/g, m => t.indexOf(m)); }
-        
+
+        function switchTab(which) {
+            document.getElementById('tab-unpaid').classList.toggle('active', which === 'unpaid');
+            document.getElementById('tab-paid').classList.toggle('active', which === 'paid');
+            document.getElementById('panel-unpaid').classList.toggle('active', which === 'unpaid');
+            document.getElementById('panel-paid').classList.toggle('active', which === 'paid');
+        }
+
         async function checkData() {
             let inputEl = document.getElementById('member-id');
             let rawId = inputEl.value.trim();
-            
-            inputEl.blur(); 
-            
+
             if (!rawId) return appSwal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาระบุรหัสประจำตัวก่อนค่ะ'});
-            
+
             setTimeout(async () => {
                 let id = toArabic(rawId);
                 appSwal.fire({ title: 'กำลังดึงข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -322,7 +417,7 @@
                     }
 
                     const memberData = doc.data();
-                    
+
                     currentUserId = id;
                     currentUserName = memberData.name;
                     currentUserClass = memberData.class || 'ครู';
@@ -334,32 +429,35 @@
 
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('result-section').style.display = 'block';
-                    
+
                     appSwal.close();
+                    refreshIcons();
 
                 } catch (e) {
                     console.error(e);
                     appSwal.fire({icon: 'error', title: 'ข้อผิดพลาด', text: 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้'});
                 }
-            }, 150); 
+            }, 150);
         }
 
         // ==========================================
-        // 🛒 ฟังก์ชัน: ซื้อของด้วยตัวเอง (เพิ่มหนี้)
+        // 🛒 ซื้อของด้วยตัวเอง (เพิ่มหนี้)
         // ==========================================
         window.selfRecordDebt = async function() {
+            lockScroll();
             const { value: amount } = await appSwal.fire({
-                title: '🛒 บันทึกซื้อสินค้า (แปะโป้ง)',
+                title: 'บันทึกซื้อสินค้า (แปะโป้ง)',
                 html: `
                     <p style="font-size: 0.9rem; color: #4A5568; margin-bottom: 10px;">ระบบจะบันทึกยอดนี้เป็น <b>"รายการค้างชำระ"</b> ทันที</p>
-                    <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุราคาสินค้า (บาท):</label>
-                    <input id="self-debt-amount" type="number" placeholder="เช่น 20, 50" style="width: 100%; padding: 12px; border: 2px solid #DD6B20; border-radius: 8px; font-family: 'Kanit'; font-size: 1.2rem; outline: none; box-sizing: border-box;">
+                    <label style="display: block; font-size: 1rem; color: #14213d; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุราคาสินค้า (บาท):</label>
+                    <input id="self-debt-amount" type="number" placeholder="เช่น 20, 50" style="width: 100%; padding: 12px; border: 2px solid #d97b23; border-radius: 8px; font-family: 'Kanit'; font-size: 1.2rem; outline: none; box-sizing: border-box;">
                 `,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#DD6B20',
+                confirmButtonColor: '#d97b23',
                 confirmButtonText: 'บันทึกซื้อสินค้า',
                 cancelButtonText: 'ยกเลิก',
+                didClose: restoreScroll,
                 preConfirm: () => {
                     const val = parseFloat(document.getElementById('self-debt-amount').value);
                     if (isNaN(val) || val <= 0) { Swal.showValidationMessage('กรุณาระบุราคาให้ถูกต้องค่ะ'); return false; }
@@ -368,10 +466,9 @@
             });
 
             if (amount) {
-                appSwal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 try {
                     const todayDate = new Date().toLocaleDateString('en-CA');
-                    
+
                     await db.collection("transactions").add({
                         member_id: currentUserId,
                         member_name: currentUserName,
@@ -383,36 +480,38 @@
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                         recorded_by: 'ผู้ใช้บันทึกเอง'
                     });
-                    
-                    appSwal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เพิ่มยอดค้างชำระ ฿${amount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false });
+
+                    showToast(`เพิ่มยอดค้างชำระ ฿${amount.toFixed(2)} เรียบร้อยแล้ว`, 'success');
                 } catch (e) {
                     console.error(e);
-                    appSwal.fire({icon: 'error', title: 'Error', text: 'ไม่สามารถบันทึกข้อมูลได้'});
+                    showToast('ไม่สามารถบันทึกข้อมูลได้', 'error');
                 }
             }
         }
 
         // ==========================================
-        // 💸 ฟังก์ชัน: จ่ายเงินด้วยตัวเอง (เคลียร์หนี้) อัปเดตแก้บั๊กค้าง!
+        // 💸 จ่ายเงินด้วยตัวเอง (เคลียร์หนี้)
         // ==========================================
         window.selfPayDebt = async function() {
             if(currentTotalDebt <= 0) {
-                return Swal.fire({icon: 'info', title: 'แจ้งเตือน', text: 'คุณไม่มีหนี้ค้างชำระเลยค่ะ สุดยอดมาก! 🎉', confirmButtonColor: '#38A169'});
+                return appSwal.fire({icon: 'info', title: 'แจ้งเตือน', text: 'คุณไม่มีหนี้ค้างชำระเลยค่ะ สุดยอดมาก!', confirmButtonColor: '#1f9d63'});
             }
 
-            const { value: payAmount } = await Swal.fire({
-                title: '💸 จ่ายเงินเคลียร์ยอด',
+            lockScroll();
+            const { value: payAmount } = await appSwal.fire({
+                title: 'จ่ายเงินเคลียร์ยอด',
                 html: `
                     <p style="font-size: 0.95rem; color: #4A5568; margin-bottom: 5px;">ยอดค้างชำระของคุณคือ <b>฿${currentTotalDebt.toFixed(2)}</b></p>
-                    <p style="font-size: 0.8rem; color: #DD6B20; margin-bottom: 15px; font-weight: 500;">* สามารถลบตัวเลขแล้วพิมพ์ยอดจ่ายบางส่วนได้ (เช่น จ่ายแค่ 30)</p>
-                    <label style="display: block; font-size: 1rem; color: #1A365D; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุจำนวนเงินที่จ่าย (บาท):</label>
-                    <input id="self-pay-amount" type="number" value="${currentTotalDebt}" style="width: 100%; padding: 12px; border: 2px solid #38A169; border-radius: 8px; font-family: 'Kanit'; font-size: 1.2rem; outline: none; box-sizing: border-box; color: #38A169; font-weight: 600;">
+                    <p style="font-size: 0.8rem; color: #d97b23; margin-bottom: 15px; font-weight: 500;">* สามารถลบตัวเลขแล้วพิมพ์ยอดจ่ายบางส่วนได้ (เช่น จ่ายแค่ 30)</p>
+                    <label style="display: block; font-size: 1rem; color: #14213d; font-weight: 500; margin-bottom: 5px; text-align: left;">ระบุจำนวนเงินที่จ่าย (บาท):</label>
+                    <input id="self-pay-amount" type="number" value="${currentTotalDebt}" style="width: 100%; padding: 12px; border: 2px solid #1f9d63; border-radius: 8px; font-family: 'Kanit'; font-size: 1.2rem; outline: none; box-sizing: border-box; color: #1f9d63; font-weight: 600;">
                 `,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#38A169',
+                confirmButtonColor: '#1f9d63',
                 confirmButtonText: 'ยืนยันการจ่ายเงิน',
                 cancelButtonText: 'ยกเลิก',
+                didClose: restoreScroll,
                 preConfirm: () => {
                     const val = parseFloat(document.getElementById('self-pay-amount').value);
                     if (isNaN(val) || val <= 0) { Swal.showValidationMessage('กรุณาระบุยอดเงินให้ถูกต้องค่ะ'); return false; }
@@ -422,9 +521,7 @@
             });
 
             if (payAmount) {
-                Swal.fire({ title: 'กำลังบันทึกการชำระเงิน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 try {
-                    // ดึงบิลค้างชำระทั้งหมดมาเพื่อเตรียมตัดยอด
                     const transSnap = await db.collection("transactions")
                         .where("member_id", "==", currentUserId.toString())
                         .where("status", "==", "unpaid")
@@ -432,8 +529,7 @@
 
                     let unpaidDocs = [];
                     transSnap.forEach(doc => unpaidDocs.push({ id: doc.id, ref: doc.ref, data: doc.data() }));
-                    
-                    // ป้องกันบั๊กเวลาวันที่ผิดพลาด
+
                     unpaidDocs.sort((a, b) => {
                         let tA = (a.data.timestamp && typeof a.data.timestamp.toDate === 'function') ? a.data.timestamp.toDate() : new Date(0);
                         let tB = (b.data.timestamp && typeof b.data.timestamp.toDate === 'function') ? b.data.timestamp.toDate() : new Date(0);
@@ -444,26 +540,24 @@
                     let remainingPay = payAmount;
 
                     for (let i = 0; i < unpaidDocs.length; i++) {
-                        if (remainingPay <= 0) break; 
+                        if (remainingPay <= 0) break;
 
                         let docObj = unpaidDocs[i];
                         let billAmt = docObj.data.amount;
 
                         if (remainingPay >= billAmt) {
-                            // จ่ายเต็มบิลนี้
-                            batch.update(docObj.ref, { 
-                                status: 'paid', 
+                            batch.update(docObj.ref, {
+                                status: 'paid',
                                 note: (docObj.data.note || '') + ' (จ่ายด้วยตนเอง)',
                                 pay_date: new Date().toLocaleDateString('en-CA')
                             });
                             remainingPay -= billAmt;
                         } else {
-                            // จ่ายบางส่วน
                             batch.update(docObj.ref, { amount: billAmt - remainingPay });
-                            
+
                             let newRef = db.collection("transactions").doc();
                             batch.set(newRef, {
-                                ...docObj.data, // <--- จุดที่แก้ไขบั๊กตัวปัญหาค่ะ
+                                ...docObj.data,
                                 amount: remainingPay,
                                 status: 'paid',
                                 note: (docObj.data.note || '') + ' (จ่ายบางส่วนด้วยตนเอง)',
@@ -474,18 +568,17 @@
                         }
                     }
 
-                    // คืนยอดซื้อสะสมให้นักเรียน
                     const memberRef = db.collection("members").doc(currentUserId.toString());
-                    batch.set(memberRef, { 
-                        total_buy_accumulated: firebase.firestore.FieldValue.increment(payAmount) 
+                    batch.set(memberRef, {
+                        total_buy_accumulated: firebase.firestore.FieldValue.increment(payAmount)
                     }, { merge: true });
 
-                    await batch.commit(); 
-                    
-                    Swal.fire({ icon: 'success', title: 'ชำระเงินสำเร็จ!', text: `ตัดยอดค้างชำระ ฿${payAmount.toFixed(2)} เรียบร้อยแล้ว`, timer: 2000, showConfirmButton: false });
+                    await batch.commit();
+
+                    showToast(`ตัดยอดค้างชำระ ฿${payAmount.toFixed(2)} เรียบร้อยแล้ว`, 'success');
                 } catch (e) {
                     console.error("Error Detail:", e);
-                    Swal.fire({icon: 'error', title: 'ผิดพลาด', text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้งค่ะ'});
+                    showToast('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
                 }
             }
         }
@@ -499,10 +592,11 @@
             document.getElementById('member-id').value = '';
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('login-section').style.display = 'block';
+            switchTab('unpaid');
         }
 
         // ==========================================
-        // 🚀 ระบบดึงข้อมูลแบบ Real-time 
+        // 🚀 ระบบดึงข้อมูลแบบ Real-time
         // ==========================================
         function startRealtimeListener() {
             if (unsubscribeTransactions) {
@@ -513,13 +607,13 @@
                 .where("member_id", "==", currentUserId)
                 .onSnapshot((snapshot) => {
                     let transactions = [];
-                    snapshot.forEach(t => { 
-                        let d = t.data(); 
-                        transactions.push({ 
-                            date: d.date, status: d.status, amount: d.amount || 0, 
+                    snapshot.forEach(t => {
+                        let d = t.data();
+                        transactions.push({
+                            date: d.date, status: d.status, amount: d.amount || 0,
                             note: d.note || (d.status === 'paid' ? 'ซื้อสินค้า/ชำระแล้ว' : 'ค้างชำระ'),
-                            time: d.timestamp ? d.timestamp.toDate() : new Date() 
-                        }); 
+                            time: d.timestamp ? d.timestamp.toDate() : new Date()
+                        });
                     });
 
                     transactions.sort((a, b) => b.time - a.time);
@@ -532,22 +626,27 @@
                             totalDebt += t.amount;
                             unpaidHtml += `
                                 <div class="bill-card unpaid">
-                                    <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:var(--accent-red);">${t.note}</div></div>
-                                    <div class="bill-amount" style="color:var(--accent-red);">฿${t.amount.toFixed(2)}</div>
+                                    <div><div class="bill-date">${t.date} · ${timeStr} น.</div><div class="bill-status" style="color:var(--red);">${t.note}</div></div>
+                                    <div class="bill-amount" style="color:var(--red);">฿${t.amount.toFixed(2)}</div>
                                 </div>`;
                         } else {
                             paidHtml += `
                                 <div class="bill-card paid">
-                                    <div><div class="bill-date">📅 ${t.date} เวลา ${timeStr}</div><div class="bill-status" style="color:#38A169;">${t.note}</div></div>
-                                    <div class="bill-amount" style="color:#38A169;">฿${t.amount.toFixed(2)}</div>
+                                    <div><div class="bill-date">${t.date} · ${timeStr} น.</div><div class="bill-status" style="color:var(--green);">${t.note}</div></div>
+                                    <div class="bill-amount" style="color:var(--green);">฿${t.amount.toFixed(2)}</div>
                                 </div>`;
                         }
                     });
 
-                    currentTotalDebt = totalDebt; // เก็บยอดลงตัวแปรกลางให้ปุ่มจ่ายเงินดึงไปใช้
-                    document.getElementById('display-total-debt').innerText = `฿${totalDebt.toFixed(2)}`;
-                    document.getElementById('unpaid-list').innerHTML = unpaidHtml || '<div class="empty-state">🎉 ไม่มีรายการค้างชำระ</div>';
-                    document.getElementById('paid-list').innerHTML = paidHtml || '<div class="empty-state">ยังไม่มีประวัติการทำรายการ</div>';
+                    currentTotalDebt = totalDebt;
+                    const debtEl = document.getElementById('display-total-debt');
+                    debtEl.innerText = `฿${totalDebt.toFixed(2)}`;
+                    debtEl.classList.toggle('zero', totalDebt <= 0);
+                    document.getElementById('debt-sub').innerText = totalDebt <= 0 ? 'ไม่มีรายการค้างชำระ 🎉' : 'กรุณาชำระเมื่อสะดวก';
+
+                    document.getElementById('unpaid-list').innerHTML = unpaidHtml || `<div class="empty-state"><span class="ic"><i data-lucide="party-popper"></i></span>ไม่มีรายการค้างชำระ</div>`;
+                    document.getElementById('paid-list').innerHTML = paidHtml || `<div class="empty-state"><span class="ic"><i data-lucide="inbox"></i></span>ยังไม่มีประวัติการทำรายการ</div>`;
+                    refreshIcons();
                 }, (error) => {
                     console.error("Realtime refresh error:", error);
                 });
