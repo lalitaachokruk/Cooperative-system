@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>ระบบบริการสมาชิก (E-Service) - สหกรณ์โรงเรียนบ้านหาดส้มแป้น</title>
 
+    <meta name="description" content="ระบบ E-Service สหกรณ์โรงเรียนบ้านหาดส้มแป้น ให้นักเรียนเช็คยอดค้างชำระ บันทึกการซื้อ และดูเงินปันผลได้ด้วยตัวเอง พร้อมช่วยคุณครูบริหารจัดการระบบสหกรณ์ได้ง่าย รวดเร็ว และโปร่งใส">
+    <meta name="keywords" content="สหกรณ์โรงเรียน, บ้านหาดส้มแป้น, E-Service, เช็คยอดสหกรณ์, เงินปันผลนักเรียน">
     
     <link rel="icon" type="image/png" href="https://www.banhadsompan.ac.th/_files_school/86101511/data/86101511_0_20240629-000624.png">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -338,7 +340,7 @@
                 <button class="btn-logout" onclick="logout()"><i data-lucide="log-out" class="ic"></i> ออก</button>
             </div>
 
-            <div class="debt-summary">
+            <div class="debt-summary" id="debt-summary-box">
                 <div class="label"><i data-lucide="wallet" class="ic"></i> ยอดค้างชำระปัจจุบัน</div>
                 <h1 id="display-total-debt">฿0.00</h1>
                 <div class="sub" id="debt-sub">กำลังโหลดข้อมูล...</div>
@@ -382,7 +384,7 @@
             </div>
 
             <div class="tabs">
-                <button class="tab-btn active" id="tab-unpaid" onclick="switchTab('unpaid')">
+                <button class="tab-btn active" id="tab-unpaid" onclick="switchTab('unpaid')" style="display:flex;">
                     <i data-lucide="alert-circle" class="ic"></i> ค้างชำระ
                 </button>
                 <button class="tab-btn" id="tab-paid" onclick="switchTab('paid')">
@@ -457,27 +459,71 @@
         // ==========================================
         // 📖 คู่มือการใช้งาน
         // ==========================================
+        window.switchManualTab = function(role) {
+            const stuBtn = document.getElementById('manual-tab-student');
+            const teaBtn = document.getElementById('manual-tab-teacher');
+            const stuPanel = document.getElementById('manual-panel-student');
+            const teaPanel = document.getElementById('manual-panel-teacher');
+            if (!stuBtn || !teaBtn || !stuPanel || !teaPanel) return;
+
+            const activeStyle = { background: '#ffffff', color: '#14213d', boxShadow: '0 2px 6px rgba(20,33,61,0.08)' };
+            const inactiveStyle = { background: 'transparent', color: '#7c8698', boxShadow: 'none' };
+
+            if (role === 'student') {
+                stuPanel.style.display = 'block'; teaPanel.style.display = 'none';
+                Object.assign(stuBtn.style, activeStyle);
+                Object.assign(teaBtn.style, inactiveStyle);
+            } else {
+                teaPanel.style.display = 'block'; stuPanel.style.display = 'none';
+                Object.assign(teaBtn.style, activeStyle);
+                Object.assign(stuBtn.style, inactiveStyle);
+            }
+        };
+
         window.showMobileManual = function() {
             lockScroll();
             appSwal.fire({
                 title: 'คู่มือการใช้งาน',
                 html: `
                 <div style="text-align: left; font-size: 0.95rem; line-height: 1.6; color: #1c2230; padding-top: 10px;">
-                    <div style="background: #eef3fb; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #14213d;">
+                    <div style="background: #eef3fb; padding: 12px; border-radius: 10px; margin-bottom: 14px; border-left: 4px solid #14213d;">
                         <b style="color: #14213d;">1. การเข้าสู่ระบบ</b><br>
-                        พิมพ์รหัสประจำตัวของท่าน (เช่น 0004 หรือ 4) ลงในช่องค้นหา แล้วกดเข้าสู่ระบบ
+                        <span style="font-size: 0.85rem; color: #4A5568;">พิมพ์รหัสประจำตัวของท่าน (เช่น 0004 หรือ 4) ลงในช่องค้นหา แล้วกดเข้าสู่ระบบ</span>
                     </div>
-                    <div style="background: #fdecec; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #d3453b;">
-                        <b style="color: #d3453b;">2. เช็คยอดค้างชำระ</b><br>
-                        ระบบจะรวมยอดเงินที่ท่าน "ค้างจ่าย" ทั้งหมดมาแสดงตรงกลางหน้าจอ
+
+                    <div style="display:flex; background:#e9ecf3; border-radius:12px; padding:4px; gap:4px; margin-bottom:14px;">
+                        <button id="manual-tab-student" onclick="switchManualTab('student')" style="flex:1; border:none; padding:11px 8px; border-radius:9px; font-family:'Kanit',sans-serif; font-size:0.92rem; font-weight:600; cursor:pointer; background:#ffffff; color:#14213d; box-shadow:0 2px 6px rgba(20,33,61,0.08);">🎒 นักเรียน</button>
+                        <button id="manual-tab-teacher" onclick="switchManualTab('teacher')" style="flex:1; border:none; padding:11px 8px; border-radius:9px; font-family:'Kanit',sans-serif; font-size:0.92rem; font-weight:600; cursor:pointer; background:transparent; color:#7c8698;">🧑‍🏫 ครู</button>
                     </div>
-                    <div style="background: #fdf1e3; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #d97b23;">
-                        <b style="color: #d97b23;">3. ซื้อของ (แปะโป้ง)</b><br>
-                        เมื่อแอดมินไม่อยู่ ให้หยิบสินค้าและกดปุ่ม "ซื้อของ" เพื่อบันทึกหนี้ด้วยตนเอง
+
+                    <div id="manual-panel-student">
+                        <div style="background: #e6f7ee; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #1f9d63;">
+                            <b style="color: #1f9d63;">ดูหุ้นและปันผล</b><br>
+                            <span style="font-size: 0.88rem;">หลังเข้าสู่ระบบ จะเห็นจำนวนหุ้นสะสม มูลค่าหุ้นรวม และยอดซื้อสะสม (ฐานคิดปันผล)</span>
+                        </div>
+                        <div style="background: #e6f7ee; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #1f9d63;">
+                            <b style="color: #1f9d63;">เช็คเงินปันผล</b><br>
+                            <span style="font-size: 0.88rem;">กดปุ่ม "เช็คสถานะเงินปันผลประจำปี" เพื่อดูว่าปีนี้ได้รับปันผลเท่าไร</span>
+                        </div>
+                        <div style="background: #eef3fb; padding: 12px; border-radius: 10px; border-left: 4px solid #14213d;">
+                            <b style="color: #14213d;">ดูประวัติการซื้อ</b><br>
+                            <span style="font-size: 0.88rem;">แท็บ "ประวัติ" จะแสดงรายการซื้อสินค้าที่ผ่านมาทั้งหมด</span>
+                        </div>
                     </div>
-                    <div style="background: #e6f7ee; padding: 12px; border-radius: 10px; border-left: 4px solid #1f9d63;">
-                        <b style="color: #1f9d63;">4. จ่ายเงินเคลียร์ยอด</b><br>
-                        สามารถจ่ายเงินเพื่อเคลียร์ยอดค้างชำระได้ด้วยตนเอง (ระบบจะตัดบิลที่เก่าที่สุดให้ก่อน)
+
+                    <div id="manual-panel-teacher" style="display:none;">
+                        <div style="background: #fdecec; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #d3453b;">
+                            <b style="color: #d3453b;">เช็คยอดค้างชำระ</b><br>
+                            <span style="font-size: 0.88rem;">ระบบจะรวมยอดเงินที่ "ค้างจ่าย" ทั้งหมดมาแสดงตรงกลางหน้าจอ</span>
+                        </div>
+                        <div style="background: #fdf1e3; padding: 12px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #d97b23;">
+                            <b style="color: #d97b23;">ซื้อของ (แปะโป้ง)</b><br>
+                            <span style="font-size: 0.88rem;">เมื่อแอดมินไม่อยู่ ให้หยิบสินค้าและกดปุ่ม "ซื้อของ" เพื่อบันทึกหนี้ด้วยตนเอง</span>
+                        </div>
+                        <div style="background: #e6f7ee; padding: 12px; border-radius: 10px; border-left: 4px solid #1f9d63;">
+                            <b style="color: #1f9d63;">จ่ายเงินเคลียร์ยอด</b><br>
+                            <span style="font-size: 0.88rem;">สามารถจ่ายเงินเพื่อเคลียร์ยอดค้างชำระได้ด้วยตนเอง (ระบบจะตัดบิลที่เก่าที่สุดให้ก่อน)</span>
+                        </div>
                     </div>
                 </div>
                 `,
@@ -535,12 +581,25 @@
                     document.getElementById('display-name').innerText = currentUserName;
                     document.getElementById('display-id').innerText = `รหัส: ${currentUserId} | ชั้น: ${currentUserClass || '-'}`;
 
-                    // FIX: the app's own welcome text and manual advertise self-service
-                    // (self-record purchase / self-pay) to every member, not just teachers.
-                    // The previous check hid these buttons for regular students, which
-                    // contradicted the advertised feature. Self-service tools are now
-                    // shown to all logged-in members.
-                    document.getElementById('teacher-tools').style.display = 'block';
+                    // ครู = รหัสสั้น (1-2 หลัก) หรือมีฟิลด์ class ระบุว่าเป็นครู
+                    // นักเรียน = รหัสยาว (เช่น 4 หลัก)
+                    const idStr = currentUserId.toString();
+                    const isTeacher = currentUserClass.includes('ครู') || idStr.length <= 2;
+
+                    if (isTeacher) {
+                        // ครู: เห็นทุกอย่าง รวมถึงปุ่มซื้อของ (แปะโป้ง) / จ่ายเงินเคลียร์ยอด
+                        document.getElementById('teacher-tools').style.display = 'block';
+                        document.getElementById('debt-summary-box').style.display = 'block';
+                        document.getElementById('tab-unpaid').style.display = 'flex';
+                        switchTab('unpaid');
+                    } else {
+                        // นักเรียน: เห็นเฉพาะหุ้น/ปันผล/ยอดซื้อสะสม และประวัติการซื้อ
+                        // ไม่แสดงยอดค้างชำระและปุ่มบันทึกซื้อ/จ่ายเงินด้วยตนเอง
+                        document.getElementById('teacher-tools').style.display = 'none';
+                        document.getElementById('debt-summary-box').style.display = 'none';
+                        document.getElementById('tab-unpaid').style.display = 'none';
+                        switchTab('paid');
+                    }
 
                     // 📊 2. คำนวณและแสดงข้อมูลหุ้น / ยอดซื้อสะสม
                     window.currentMemberShares = memberData.shares || 0;
