@@ -71,26 +71,31 @@
         .ic { display: inline-flex; }
         .ic svg { width: 1em; height: 1em; stroke-width: 2.1; }
 
-        /* Welcome hero banner (decorative) */
+        /* Welcome hero banner (decorative) — tuned for mobile proportions */
         .welcome-hero {
             position: relative; overflow: hidden;
             background: linear-gradient(120deg, var(--navy) 0%, var(--navy-2) 42%, #6b2530 72%, var(--brand-red) 100%);
-            border-radius: var(--radius); padding: 28px 22px 26px; margin-bottom: 18px;
+            border-radius: var(--radius);
+            padding: clamp(18px, 6vw, 28px) clamp(16px, 5vw, 22px) clamp(16px, 5vw, 24px);
+            margin-bottom: 16px;
             color: white; text-align: center;
-            box-shadow: 0 12px 28px rgba(20,33,61,0.2);
+            box-shadow: 0 10px 22px rgba(20,33,61,0.2);
         }
         .welcome-hero .blob {
             position: absolute; border-radius: 50%; background: rgba(255,255,255,0.08);
         }
-        .welcome-hero .blob.b1 { width: 140px; height: 140px; top: -50px; left: -40px; }
-        .welcome-hero .blob.b2 { width: 100px; height: 100px; bottom: -40px; right: -20px; background: rgba(255,255,255,0.06); }
+        .welcome-hero .blob.b1 { width: 100px; height: 100px; top: -34px; left: -28px; }
+        .welcome-hero .blob.b2 { width: 76px; height: 76px; bottom: -28px; right: -14px; background: rgba(255,255,255,0.06); }
         .welcome-hero .hero-icon {
-            position: relative; width: 64px; height: 64px; margin: 0 auto 14px;
-            background: rgba(255,255,255,0.14); border-radius: 18px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+            position: relative; width: 52px; height: 52px; margin: 0 auto 10px;
+            background: rgba(255,255,255,0.14); border-radius: 15px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
         }
-        .welcome-hero h2 { position: relative; font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; }
-        .welcome-hero p { position: relative; font-size: 0.85rem; opacity: 0.85; line-height: 1.5; }
+        .welcome-hero h2 { position: relative; font-size: clamp(1rem, 4.2vw, 1.1rem); font-weight: 600; margin-bottom: 5px; }
+        .welcome-hero p {
+            position: relative; font-size: clamp(0.78rem, 3.4vw, 0.85rem); opacity: 0.85; line-height: 1.45;
+            max-width: 300px; margin: 0 auto;
+        }
 
         /* Login / search */
         .search-box {
@@ -520,17 +525,20 @@
 
                     currentUserId = id;
                     currentUserName = memberData.name;
-                    currentUserClass = memberData.class || 'ครู';
+                    // FIX: previously defaulted a missing "class" field to 'ครู' (teacher),
+                    // which silently granted teacher-level access to any member record
+                    // that simply hadn't had a class set. Default to empty string instead.
+                    currentUserClass = memberData.class || '';
 
                     document.getElementById('display-name').innerText = currentUserName;
-                    document.getElementById('display-id').innerText = `รหัส: ${currentUserId} | ชั้น: ${currentUserClass}`;
+                    document.getElementById('display-id').innerText = `รหัส: ${currentUserId} | ชั้น: ${currentUserClass || '-'}`;
 
-                    // 🔒 1. แยกระบบ: ถ้าเป็นครูให้โชว์ปุ่มแปะโป้ง/เคลียร์ยอด ถ้านักเรียนให้ซ่อน
-                    if (currentUserClass.includes('ครู') || currentUserId.length <= 2) {
-                        document.getElementById('teacher-tools').style.display = 'block';
-                    } else {
-                        document.getElementById('teacher-tools').style.display = 'none';
-                    }
+                    // FIX: the app's own welcome text and manual advertise self-service
+                    // (self-record purchase / self-pay) to every member, not just teachers.
+                    // The previous check hid these buttons for regular students, which
+                    // contradicted the advertised feature. Self-service tools are now
+                    // shown to all logged-in members.
+                    document.getElementById('teacher-tools').style.display = 'block';
 
                     // 📊 2. คำนวณและแสดงข้อมูลหุ้น / ยอดซื้อสะสม
                     window.currentMemberShares = memberData.shares || 0;
@@ -548,8 +556,7 @@
                     } catch(e) {}
                     document.getElementById('disp-shares-val').innerText = `฿${(window.currentMemberShares * sharePrice).toFixed(2)}`;
 
-                    startRealtimeListener();
-
+                    // FIX: removed accidental duplicate call to startRealtimeListener()
                     startRealtimeListener();
 
                     document.getElementById('login-section').style.display = 'none';
