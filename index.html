@@ -185,6 +185,38 @@
         .btn-self-record { background: var(--amber-soft); color: var(--amber); border: 1px solid #f5dcb8; }
         .btn-self-pay { background: var(--green-soft); color: var(--green); border: 1px solid #bfe8d3; }
 
+        /* Shares & Dividend Card */
+        .shares-card {
+            background: var(--card); padding: 18px; border-radius: var(--radius);
+            border: 1px solid var(--line); margin-bottom: 14px; text-align: left;
+        }
+        .shares-header {
+            font-size: 1rem; color: var(--navy); font-weight: 600; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .shares-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;
+        }
+        .s-box {
+            background: var(--bg); padding: 12px; border-radius: 12px; border: 1px solid var(--line);
+        }
+        .s-lbl { font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+        .s-val { font-size: 1.3rem; font-weight: 600; color: var(--navy); }
+        .text-green { color: var(--green) !important; }
+        .accum-buy-box {
+            background: linear-gradient(135deg, var(--navy-2), var(--navy)); color: white; 
+            padding: 14px; border-radius: 12px; font-size: 0.9rem; margin-bottom: 12px; 
+            box-shadow: 0 6px 16px rgba(20,33,61,0.15);
+        }
+        .flex-btwn { display: flex; justify-content: space-between; align-items: center; }
+        .btn-check-dividend {
+            width: 100%; padding: 12px; background: var(--green-soft); color: var(--green);
+            border: 1px solid #bfe8d3; border-radius: 10px; font-size: 0.95rem; font-weight: 600;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
+            transition: 0.2s;
+        }
+        .btn-check-dividend:active { transform: scale(0.98); }
+
         /* Tabs */
         .tabs { display: flex; background: #e9ecf3; border-radius: 12px; padding: 4px; margin-bottom: 12px; gap: 4px; }
         .tab-btn {
@@ -305,7 +337,33 @@
                 <div class="sub" id="debt-sub">กำลังโหลดข้อมูล...</div>
             </div>
 
-            <div class="self-service-box">
+            <!-- 🌟 ส่วนที่เพิ่มใหม่: ข้อมูลหุ้นและปันผล -->
+            <div class="shares-card" id="shares-section">
+                <div class="shares-header">
+                    <i data-lucide="pie-chart" class="ic text-navy"></i> ข้อมูลหุ้นและปันผล
+                </div>
+                <div class="shares-grid">
+                    <div class="s-box">
+                        <div class="s-lbl">จำนวนหุ้นสะสม</div>
+                        <div class="s-val" id="disp-shares">0 <span style="font-size:0.8rem; font-weight:400; color:var(--muted);">หน่วย</span></div>
+                    </div>
+                    <div class="s-box">
+                        <div class="s-lbl">มูลค่าหุ้นรวม</div>
+                        <div class="s-val text-green" id="disp-shares-val">฿0.00</div>
+                    </div>
+                </div>
+                <div class="accum-buy-box">
+                    <div class="flex-btwn">
+                        <span><i data-lucide="shopping-bag" class="ic"></i> ยอดซื้อสะสม (ฐานคิดปันผล)</span>
+                        <strong id="disp-accum-buy">฿0.00</strong>
+                    </div>
+                </div>
+                <button class="btn-check-dividend" onclick="checkDividend()">
+                    <i data-lucide="gift" class="ic"></i> เช็คสถานะเงินปันผลประจำปี
+                </button>
+            </div>
+
+            <div class="self-service-box" id="teacher-tools">
                 <div class="self-service-actions">
                     <button class="action-btn btn-self-record" onclick="selfRecordDebt()">
                         <span class="ic"><i data-lucide="shopping-cart"></i></span> ซื้อของ (แปะโป้ง)
@@ -466,6 +524,31 @@
 
                     document.getElementById('display-name').innerText = currentUserName;
                     document.getElementById('display-id').innerText = `รหัส: ${currentUserId} | ชั้น: ${currentUserClass}`;
+
+                    // 🔒 1. แยกระบบ: ถ้าเป็นครูให้โชว์ปุ่มแปะโป้ง/เคลียร์ยอด ถ้านักเรียนให้ซ่อน
+                    if (currentUserClass.includes('ครู') || currentUserId.length <= 2) {
+                        document.getElementById('teacher-tools').style.display = 'block';
+                    } else {
+                        document.getElementById('teacher-tools').style.display = 'none';
+                    }
+
+                    // 📊 2. คำนวณและแสดงข้อมูลหุ้น / ยอดซื้อสะสม
+                    window.currentMemberShares = memberData.shares || 0;
+                    window.currentMemberAccumBuy = memberData.total_buy_accumulated || 0;
+                    window.currentMemberDividend = memberData.dividend_amount; // ดึงยอดปันผล(ถ้าแอดมินบันทึกไว้)
+
+                    document.getElementById('disp-shares').innerHTML = `${window.currentMemberShares} <span style="font-size:0.8rem; font-weight:400; color:var(--muted);">หน่วย</span>`;
+                    document.getElementById('disp-accum-buy').innerText = `฿${window.currentMemberAccumBuy.toFixed(2)}`;
+
+                    // พยายามดึงราคาหุ้นจากหลังบ้าน (เผื่อการปรับราคาในอนาคต)
+                    let sharePrice = 10;
+                    try {
+                        let sysDoc = await db.collection("settings").doc("system").get();
+                        if(sysDoc.exists && sysDoc.data().sharePrice) sharePrice = sysDoc.data().sharePrice;
+                    } catch(e) {}
+                    document.getElementById('disp-shares-val').innerText = `฿${(window.currentMemberShares * sharePrice).toFixed(2)}`;
+
+                    startRealtimeListener();
 
                     startRealtimeListener();
 
@@ -692,6 +775,27 @@
                 }, (error) => {
                     console.error("Realtime refresh error:", error);
                 });
+        }
+        // ==========================================
+        // 🎁 ระบบเช็คยอดปันผลของนักเรียน
+        // ==========================================
+        window.checkDividend = function() {
+            // ถ้าระบบหลังบ้าน(แอดมิน) มีการคำนวณและบันทึกค่ายอดปันผลลงฟิลด์ dividend_amount แล้ว
+            if (window.currentMemberDividend !== undefined && window.currentMemberDividend > 0) {
+                appSwal.fire({
+                    title: '🎉 ยินดีด้วย!',
+                    html: `ปีการศึกษานี้คุณได้รับเงินปันผลรวม:<br><strong style="font-size:2.2rem; color:#1f9d63; display:block; margin:15px 0;">฿${window.currentMemberDividend.toFixed(2)}</strong><span style="font-size:0.85rem; color:#7c8698;">สามารถติดต่อรับเงินสดได้ที่ห้องสหกรณ์ค่ะ</span>`,
+                    confirmButtonColor: '#14213d'
+                });
+            } else {
+                // ถ้าแอดมินยังไม่ประกาศ หรือยังไม่ได้บันทึกยอด
+                appSwal.fire({
+                    icon: 'info',
+                    title: 'รอการประมวลผล ⏳',
+                    html: `ยอดซื้อสะสมของคุณตอนนี้คือ <b>฿${window.currentMemberAccumBuy.toFixed(2)}</b><br><br><span style="font-size:0.9rem; color:#4A5568;">ขณะนี้ระบบกำลังอยู่ระหว่างรอคณะกรรมการสหกรณ์คำนวณและประกาศยอดเงินปันผลประจำปีค่ะ กรุณาตรวจสอบอีกครั้งในภายหลัง</span>`,
+                    confirmButtonColor: '#14213d'
+                });
+            }
         }
     </script>
 </body>
