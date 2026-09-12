@@ -69,36 +69,43 @@
         .header h1 { font-size: 0.95rem; color: var(--navy); font-weight: 600; }
         .header p { font-size: 0.72rem; color: var(--muted); font-weight: 400; }
 
-        .container { padding: 18px 16px 90px; max-width: 560px; margin: 0 auto; flex: 1; width: 100%; }
+        .container {
+            padding: 18px 16px 90px; max-width: 560px; margin: 0 auto; flex: 1; width: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+        }
 
         /* Icon chip helper */
         .ic { display: inline-flex; }
         .ic svg { width: 1em; height: 1em; stroke-width: 2.1; }
 
-        /* Welcome hero banner (decorative) — tuned for mobile proportions */
+        /* Welcome hero banner (decorative) — bright & lively version, mobile-first proportions */
         .welcome-hero {
             position: relative; overflow: hidden;
-            background: linear-gradient(120deg, var(--navy) 0%, var(--navy-2) 42%, #6b2530 72%, var(--brand-red) 100%);
+            background: linear-gradient(135deg, #dceafe 0%, #eef6ff 42%, #ffe7e1 100%);
+            border: 1px solid var(--line);
             border-radius: var(--radius);
             padding: clamp(18px, 6vw, 28px) clamp(16px, 5vw, 22px) clamp(16px, 5vw, 24px);
             margin-bottom: 16px;
-            color: white; text-align: center;
-            box-shadow: 0 10px 22px rgba(20,33,61,0.2);
+            color: var(--navy); text-align: center;
+            box-shadow: 0 8px 20px rgba(20,33,61,0.08);
         }
         .welcome-hero .blob {
-            position: absolute; border-radius: 50%; background: rgba(255,255,255,0.08);
+            position: absolute; border-radius: 50%;
         }
-        .welcome-hero .blob.b1 { width: 100px; height: 100px; top: -34px; left: -28px; }
-        .welcome-hero .blob.b2 { width: 76px; height: 76px; bottom: -28px; right: -14px; background: rgba(255,255,255,0.06); }
+        .welcome-hero .blob.b1 { width: 120px; height: 120px; top: -42px; left: -32px; background: rgba(31,58,99,0.18); }
+        .welcome-hero .blob.b2 { width: 90px; height: 90px; bottom: -32px; right: -18px; background: rgba(211,69,59,0.18); }
         .welcome-hero .hero-icon {
-            position: relative; width: 52px; height: 52px; margin: 0 auto 10px;
-            background: rgba(255,255,255,0.14); border-radius: 15px;
+            position: relative; width: 54px; height: 54px; margin: 0 auto 10px;
+            background: linear-gradient(135deg, #2a4d80, var(--brand-red));
+            color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 6px 16px rgba(127,1,1,0.28);
             display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
         }
-        .welcome-hero h2 { position: relative; font-size: clamp(1rem, 4.2vw, 1.1rem); font-weight: 600; margin-bottom: 5px; }
+        .welcome-hero h2 { position: relative; font-size: clamp(1rem, 4.2vw, 1.15rem); font-weight: 600; margin-bottom: 5px; color: var(--navy); }
         .welcome-hero p {
-            position: relative; font-size: clamp(0.78rem, 3.4vw, 0.85rem); opacity: 0.85; line-height: 1.45;
-            max-width: 300px; margin: 0 auto;
+            position: relative; font-size: clamp(0.78rem, 3.4vw, 0.88rem); opacity: 0.85; line-height: 1.5;
+            max-width: 320px; margin: 0 auto; color: var(--ink);
         }
 
         /* Login / search */
@@ -146,9 +153,6 @@
         }
         .feature-text { font-size: 0.9rem; color: var(--ink); font-weight: 500; text-align: left; line-height: 1.3; }
         .feature-text span { color: var(--muted); font-size: 0.78rem; font-weight: 400; }
-
-        /* Result section */
-        #result-section { display: none; }
 
         .profile-card {
             background: linear-gradient(135deg, var(--navy), var(--navy-2)); color: white;
@@ -280,6 +284,88 @@
         .toast .ic { flex-shrink: 0; font-size: 1.1rem; }
 
         body.swal2-shown { padding-right: 0 !important; overflow-y: auto !important; }
+
+        /* Utility: use a class (not inline styles) to show/hide login vs
+           member sections, so media-query display rules (grid on desktop)
+           aren't overridden by JS-set inline "display:block". */
+        .hidden { display: none !important; }
+
+        /* ===========================================================
+           📱➡️🖥️ Responsive layout — scales from phone up through
+           tablet and desktop instead of staying phone-width only.
+           =========================================================== */
+
+        /* Tablets and up */
+        @media (min-width: 640px) {
+            .container { max-width: 680px; padding: 24px 24px 100px; }
+            .header { padding: 16px 28px; }
+            .header img { height: 40px; width: 40px; }
+            .header h1 { font-size: 1.05rem; }
+            .header p { font-size: 0.78rem; }
+
+            .welcome-hero p { max-width: 420px; }
+
+            .self-service-actions { grid-template-columns: 1fr 1fr; gap: 14px; }
+            .action-btn { padding: 18px 12px; font-size: 0.92rem; }
+
+            .shares-grid { gap: 16px; }
+            .s-val { font-size: 1.45rem; }
+
+            .profile-card, .debt-summary, .shares-card, .search-box, .features-list { padding: 24px; }
+        }
+
+        /* Small desktop / large tablet in LANDSCAPE — use the extra width for
+           side-by-side layout. Restricted to landscape so a tall, narrow
+           tablet portrait (e.g. iPad Pro 12.9" at 1024px wide) doesn't get
+           forced into a 2-column grid that leaves content stranded at the
+           top with empty space below. Portrait keeps the normal stacked
+           layout from the 640px breakpoint above. */
+        @media (min-width: 900px) and (orientation: landscape) {
+            .container { max-width: 920px; }
+
+            .header { padding: 16px 40px; }
+
+            /* Login screen: hero + search/features side-by-side */
+            #login-section {
+                display: grid;
+                grid-template-columns: 1fr 1.1fr;
+                gap: 20px;
+                align-items: start;
+            }
+            #login-section .welcome-hero {
+                grid-column: 1;
+                grid-row: 1 / span 2;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                margin-bottom: 0;
+            }
+            #login-section .search-box { grid-column: 2; grid-row: 1; margin-bottom: 0; }
+            #login-section .features-list { grid-column: 2; grid-row: 2; }
+
+            /* Member view: profile/debt/shares in a summary row, then tabs full width */
+            .profile-card { grid-column: 1 / -1; }
+            #result-section {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                align-items: start;
+            }
+            #result-section .profile-card { grid-column: 1 / -1; margin-bottom: 0; }
+            #result-section .debt-summary { grid-column: 1; margin-bottom: 0; }
+            #result-section .shares-card { grid-column: 2; margin-bottom: 0; }
+            #result-section .self-service-box { grid-column: 1 / -1; margin-bottom: 0; }
+            #result-section .tabs { grid-column: 1 / -1; margin-bottom: 0; }
+            #result-section .tab-panel { grid-column: 1 / -1; }
+        }
+
+        /* Desktop — a bit more breathing room, cap overall width */
+        @media (min-width: 1200px) {
+            .container { max-width: 1080px; padding-top: 32px; }
+            .welcome-hero h2 { font-size: 1.3rem; }
+            .welcome-hero p { font-size: 0.95rem; max-width: 460px; }
+        }
     </style>
 </head>
 <body>
@@ -335,7 +421,7 @@
             </div>
         </div>
 
-        <div id="result-section">
+        <div id="result-section" class="hidden">
             <div class="profile-card">
                 <div class="profile-info">
                     <h2 id="display-name">ชื่อ - นามสกุล</h2>
@@ -429,6 +515,7 @@
         let currentUserClass = '';
         let currentTotalDebt = 0;
         let unsubscribeTransactions = null;
+        let cachedSharePrice = null; // ราคาหุ้นแทบไม่เปลี่ยน จึงแคชไว้ในเซสชันนี้ ไม่ต้องดึงซ้ำทุกครั้งที่ล็อกอิน
 
         function refreshIcons() { if (window.lucide) lucide.createIcons(); }
         refreshIcons();
@@ -561,6 +648,12 @@
                 appSwal.fire({ title: 'กำลังดึงข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
                 try {
+                    // ยิงดึงราคาหุ้นพร้อมกับค้นหาสมาชิกไปเลย (ไม่ต้องรอให้เจอสมาชิกก่อน)
+                    // แต่ยิงเฉพาะตอนยังไม่มีแคชในเซสชันนี้ — ถ้ามีแคชแล้วก็ไม่ต้อง query ซ้ำเลย
+                    const sharePricePromise = (cachedSharePrice !== null)
+                        ? Promise.resolve(null)
+                        : db.collection("settings").doc("system").get().catch(() => null);
+
                     let doc = await db.collection("members").doc(id).get();
                     if (!doc.exists) {
                         let strippedVal = id.replace(/^0+/, '');
@@ -613,19 +706,20 @@
                     document.getElementById('disp-shares').innerHTML = `${window.currentMemberShares} <span style="font-size:0.8rem; font-weight:400; color:var(--muted);">หน่วย</span>`;
                     document.getElementById('disp-accum-buy').innerText = `฿${window.currentMemberAccumBuy.toFixed(2)}`;
 
-                    // พยายามดึงราคาหุ้นจากหลังบ้าน (เผื่อการปรับราคาในอนาคต)
-                    let sharePrice = 10;
-                    try {
-                        let sysDoc = await db.collection("settings").doc("system").get();
-                        if(sysDoc.exists && sysDoc.data().sharePrice) sharePrice = sysDoc.data().sharePrice;
-                    } catch(e) {}
-                    document.getElementById('disp-shares-val').innerText = `฿${(window.currentMemberShares * sharePrice).toFixed(2)}`;
+                    // ราคาหุ้น: ใช้ค่าที่แคชไว้ถ้ามี ไม่งั้นรอผลลัพธ์จาก query ที่ยิงคู่ขนานไปแล้วด้านบน
+                    if (cachedSharePrice === null) {
+                        let sharePrice = 10;
+                        const sysDoc = await sharePricePromise;
+                        if (sysDoc && sysDoc.exists && sysDoc.data().sharePrice) sharePrice = sysDoc.data().sharePrice;
+                        cachedSharePrice = sharePrice; // แคชไว้ใช้ต่อในเซสชันนี้ ไม่ต้องดึงซ้ำอีก
+                    }
+                    document.getElementById('disp-shares-val').innerText = `฿${(window.currentMemberShares * cachedSharePrice).toFixed(2)}`;
 
                     // FIX: removed accidental duplicate call to startRealtimeListener()
                     startRealtimeListener();
 
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('result-section').style.display = 'block';
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('result-section').classList.remove('hidden');
 
                     appSwal.close();
                     refreshIcons();
@@ -787,8 +881,8 @@
             }
             currentUserId = ''; currentUserName = ''; currentUserClass = '';
             document.getElementById('member-id').value = '';
-            document.getElementById('result-section').style.display = 'none';
-            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
             switchTab('unpaid');
         }
 
