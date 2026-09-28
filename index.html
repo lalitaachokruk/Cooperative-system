@@ -366,6 +366,7 @@
             .welcome-hero h2 { font-size: 1.3rem; }
             .welcome-hero p { font-size: 0.95rem; max-width: 460px; }
         }
+        .pin-popup { border-radius: 20px !important; padding: 22px 18px 18px !important; }
     </style>
 </head>
 <body>
@@ -637,6 +638,9 @@
             document.getElementById('panel-paid').classList.toggle('active', which === 'paid');
         }
 
+        function escapeHtmlPin(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
         async function checkData() {
             let inputEl = document.getElementById('member-id');
             let rawId = inputEl.value.trim();
@@ -683,21 +687,53 @@
                     const idStr = currentUserId.toString();
                     const isTeacher = currentUserClass.includes('ครู') || idStr.length <= 2;
                     // ===== เพิ่มใหม่: ถาม PIN ก่อนให้ครูเข้า =====
-                    if (isTeacher) {
-                    const { value: pin, isConfirmed } = await appSwal.fire({
-                    title: 'ยืนยันตัวตนครู',
-                    input: 'password',
-                    inputPlaceholder: 'ใส่ PIN ของท่าน',
-                    inputAttributes: { inputmode: 'numeric', autocomplete: 'off' },
-                    showCancelButton: true,
-                    confirmButtonText: 'ยืนยัน',
-                    cancelButtonText: 'ยกเลิก',
-                    confirmButtonColor: '#14213d'
-                    });
-                   if (!isConfirmed || !memberData.pin || String(pin).trim() !== String(memberData.pin)) {
-                   return appSwal.fire({ icon: 'error', title: 'PIN ไม่ถูกต้อง', confirmButtonColor: '#7f0101' });
-                   }
-                   }
+if (isTeacher) {
+    const { value: pin, isConfirmed } = await appSwal.fire({
+        title: '',
+        html: `
+            <div style="text-align:center; padding-top:6px;">
+                <div style="width:60px; height:60px; margin:0 auto 12px; border-radius:16px;
+                            background:linear-gradient(135deg,#2a4d80,#7f0101);
+                            display:flex; align-items:center; justify-content:center;
+                            box-shadow:0 6px 16px rgba(127,1,1,0.28); font-size:1.7rem;">🔐</div>
+                <div style="font-size:1.15rem; font-weight:600; color:#14213d; margin-bottom:4px;">ยืนยันตัวตนครู</div>
+                <div style="font-size:0.85rem; color:#7c8698; margin-bottom:6px;">
+                    ${escapeHtmlPin(memberData.name || '')}
+                </div>
+                <div style="font-size:0.8rem; color:#7c8698;">กรุณาใส่ PIN เพื่อใช้งานเมนูสำหรับครู</div>
+            </div>
+            <input id="teacher-pin-input" type="password" inputmode="numeric" autocomplete="off"
+                   placeholder="• • • •" maxlength="8"
+                   style="width:100%; margin-top:16px; padding:14px; font-size:1.5rem; text-align:center;
+                          letter-spacing:8px; border:1.5px solid #e7ebf2; border-radius:12px;
+                          background:#f3f5f9; outline:none; box-sizing:border-box; font-family:'Kanit',sans-serif;"
+                   onfocus="this.style.borderColor='#1f3a63'; this.style.background='#fff';"
+                   onblur="this.style.borderColor='#e7ebf2'; this.style.background='#f3f5f9';">
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#14213d',
+        cancelButtonColor: '#a8b0bd',
+        focusConfirm: false,
+        customClass: { popup: 'pin-popup' },
+        didOpen: () => {
+            const el = document.getElementById('teacher-pin-input');
+            el.focus();
+            el.addEventListener('keypress', (e) => { if (e.key === 'Enter') Swal.clickConfirm(); });
+        },
+        preConfirm: () => document.getElementById('teacher-pin-input').value
+    });
+    if (!isConfirmed || !memberData.pin || String(pin).trim() !== String(memberData.pin)) {
+        return appSwal.fire({
+            icon: 'error',
+            title: 'PIN ไม่ถูกต้อง',
+            text: 'กรุณาลองใหม่อีกครั้ง',
+            confirmButtonColor: '#7f0101',
+            confirmButtonText: 'ตกลง'
+        });
+    }
+}
 // ===== จบส่วนที่เพิ่ม =====
 
                     if (isTeacher) {
