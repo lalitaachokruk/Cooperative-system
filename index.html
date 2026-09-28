@@ -366,7 +366,43 @@
             .welcome-hero h2 { font-size: 1.3rem; }
             .welcome-hero p { font-size: 0.95rem; max-width: 460px; }
         }
-        .pin-popup { border-radius: 20px !important; padding: 22px 18px 18px !important; }
+        /* ===== กล่อง PIN ครู ===== */
+.pin-popup {
+    width: min(92vw, 360px) !important; padding: 26px 22px 20px !important;
+    border-radius: var(--radius) !important; border: 1px solid var(--line);
+    box-shadow: 0 8px 24px rgba(20,33,61,0.10) !important;
+}
+.pin-icon {
+    width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 15px;
+    background: linear-gradient(135deg, #2a4d80, var(--brand-red)); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+    box-shadow: 0 6px 16px rgba(127,1,1,0.28);
+}
+.pin-title { font-size: 1.1rem; font-weight: 600; color: var(--navy); }
+.pin-name { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+.pin-hint { font-size: 0.78rem; color: var(--muted); margin: 10px 0 14px; }
+.pin-input-wrap { position: relative; }
+.pin-input-wrap .ic {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 1.15rem; pointer-events: none;
+}
+.pin-input {
+    width: 100%; padding: 14px 14px 14px 42px; font-size: 1.1rem; letter-spacing: 4px;
+    border: 1.5px solid var(--line); border-radius: 12px; outline: none;
+    background: var(--bg); transition: 0.2s; text-align: left;
+}
+.pin-input::placeholder { letter-spacing: 0; }
+.pin-input:focus { border-color: var(--navy-2); background: var(--card); }
+.pin-actions { display: flex !important; flex-direction: column; gap: 6px; width: 100%; margin: 14px 0 0 !important; }
+.pin-confirm {
+    width: 100%; padding: 14px; background: var(--navy); color: #fff; border: none;
+    border-radius: 12px; font-size: 1.02rem; font-weight: 500; cursor: pointer; font-family: inherit;
+}
+.pin-confirm:active { background: var(--navy-2); }
+.pin-cancel {
+    background: transparent; border: none; color: var(--muted);
+    font-size: 0.9rem; padding: 8px; cursor: pointer; font-family: inherit;
+}
     </style>
 </head>
 <body>
@@ -688,51 +724,53 @@
                     const isTeacher = currentUserClass.includes('ครู') || idStr.length <= 2;
                     // ===== เพิ่มใหม่: ถาม PIN ก่อนให้ครูเข้า =====
 if (isTeacher) {
-    const { value: pin, isConfirmed } = await appSwal.fire({
-        title: '',
+    const { isConfirmed } = await appSwal.fire({
         html: `
-            <div style="text-align:center; padding-top:6px;">
-                <div style="width:60px; height:60px; margin:0 auto 12px; border-radius:16px;
-                            background:linear-gradient(135deg,#2a4d80,#7f0101);
-                            display:flex; align-items:center; justify-content:center;
-                            box-shadow:0 6px 16px rgba(127,1,1,0.28); font-size:1.7rem;">🔐</div>
-                <div style="font-size:1.15rem; font-weight:600; color:#14213d; margin-bottom:4px;">ยืนยันตัวตนครู</div>
-                <div style="font-size:0.85rem; color:#7c8698; margin-bottom:6px;">
-                    ${escapeHtmlPin(memberData.name || '')}
-                </div>
-                <div style="font-size:0.8rem; color:#7c8698;">กรุณาใส่ PIN เพื่อใช้งานเมนูสำหรับครู</div>
+            <div class="pin-icon"><i data-lucide="lock-keyhole"></i></div>
+            <div class="pin-title">ยืนยันตัวตนครู</div>
+            <div class="pin-name">${escapeHtmlPin(memberData.name || '')}</div>
+            <div class="pin-hint">ใส่ PIN เพื่อใช้งานเมนูสำหรับครู</div>
+            <div class="pin-input-wrap">
+                <span class="ic"><i data-lucide="key-round"></i></span>
+                <input id="teacher-pin-input" class="pin-input" type="password"
+                       inputmode="numeric" autocomplete="off" maxlength="8" placeholder="ใส่ PIN">
             </div>
-            <input id="teacher-pin-input" type="password" inputmode="numeric" autocomplete="off"
-                   placeholder="• • • •" maxlength="8"
-                   style="width:100%; margin-top:16px; padding:14px; font-size:1.5rem; text-align:center;
-                          letter-spacing:8px; border:1.5px solid #e7ebf2; border-radius:12px;
-                          background:#f3f5f9; outline:none; box-sizing:border-box; font-family:'Kanit',sans-serif;"
-                   onfocus="this.style.borderColor='#1f3a63'; this.style.background='#fff';"
-                   onblur="this.style.borderColor='#e7ebf2'; this.style.background='#f3f5f9';">
         `,
         showCancelButton: true,
         confirmButtonText: 'ยืนยัน',
         cancelButtonText: 'ยกเลิก',
-        confirmButtonColor: '#14213d',
-        cancelButtonColor: '#a8b0bd',
+        buttonsStyling: false,
         focusConfirm: false,
-        customClass: { popup: 'pin-popup' },
+        customClass: {
+            popup: 'pin-popup',
+            actions: 'pin-actions',
+            confirmButton: 'pin-confirm',
+            cancelButton: 'pin-cancel'
+        },
         didOpen: () => {
+            refreshIcons();
             const el = document.getElementById('teacher-pin-input');
             el.focus();
             el.addEventListener('keypress', (e) => { if (e.key === 'Enter') Swal.clickConfirm(); });
         },
-        preConfirm: () => document.getElementById('teacher-pin-input').value
+        preConfirm: () => {
+            const v = document.getElementById('teacher-pin-input').value.trim();
+            if (!memberData.pin) {
+                Swal.showValidationMessage('ยังไม่ได้ตั้ง PIN กรุณาติดต่อแอดมิน');
+                return false;
+            }
+            if (v !== String(memberData.pin)) {
+                Swal.showValidationMessage('PIN ไม่ถูกต้อง กรุณาลองใหม่');
+                return false;
+            }
+            return true;
+        }
     });
-    if (!isConfirmed || !memberData.pin || String(pin).trim() !== String(memberData.pin)) {
-        return appSwal.fire({
-            icon: 'error',
-            title: 'PIN ไม่ถูกต้อง',
-            text: 'กรุณาลองใหม่อีกครั้ง',
-            confirmButtonColor: '#7f0101',
-            confirmButtonText: 'ตกลง'
-        });
-    }
+
+    if (!isConfirmed) return; // กดยกเลิก: กลับหน้ากรอกรหัสเฉย ๆ
+
+    // ใส่ PIN ถูกแล้ว: ให้วงกลมหมุนกลับมา ระหว่างรอสลับหน้า
+    appSwal.fire({ title: 'กำลังเข้าสู่ระบบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 }
 // ===== จบส่วนที่เพิ่ม =====
 
