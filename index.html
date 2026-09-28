@@ -682,6 +682,23 @@
                     // นักเรียน = รหัสยาว (เช่น 4 หลัก)
                     const idStr = currentUserId.toString();
                     const isTeacher = currentUserClass.includes('ครู') || idStr.length <= 2;
+                    // ===== เพิ่มใหม่: ถาม PIN ก่อนให้ครูเข้า =====
+                    if (isTeacher) {
+                    const { value: pin, isConfirmed } = await appSwal.fire({
+                    title: 'ยืนยันตัวตนครู',
+                    input: 'password',
+                    inputPlaceholder: 'ใส่ PIN ของท่าน',
+                    inputAttributes: { inputmode: 'numeric', autocomplete: 'off' },
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#14213d'
+                    });
+                   if (!isConfirmed || !memberData.pin || String(pin).trim() !== String(memberData.pin)) {
+                   return appSwal.fire({ icon: 'error', title: 'PIN ไม่ถูกต้อง', confirmButtonColor: '#7f0101' });
+                   }
+                   }
+// ===== จบส่วนที่เพิ่ม =====
 
                     if (isTeacher) {
                         // ครู: เห็นทุกอย่าง รวมถึงปุ่มซื้อของ (แปะโป้ง) / จ่ายเงินเคลียร์ยอด
